@@ -9,8 +9,14 @@ class Ssh:
   def __init__(self,server):
     self.server = server
 
+  def del_keyfile(self):
+     os.popen("ssh-keygen -R %s" % self.server,"r")
+
+  def copy_id(self):
+     os.popen("ssh-copy-id %s" % self.server,"r")
+
   def exec_cmd(self,cmd=''):
-    CMD = os.popen("ssh root@%s '%s'" % (self.server,cmd),"r")
+    CMD = os.popen("ssh -o \"StrictHostKeyChecking=no\" root@%s '%s'" % (self.server,cmd),"r")
     ret = CMD.readlines()
     return ret
 
@@ -176,6 +182,7 @@ class xen_host:
     self.bs=self.xenmgtconf["DD_BS"]
     self.P = physical_host(ip_srv_phy)
     self.ip_srv_phy = ip_srv_phy
+    self.ssh = Ssh(self.ip_srv_phy)
 
   def exec_cmd(self,cmd=''):
     CMD = os.popen(cmd,"r")
@@ -196,8 +203,11 @@ class xen_host:
     self.vgname = vgname
 
   def get_name_vm_dest(self):
-    self.exec_cmd("ssh-keygen -R %s ; ssh-copy-id %s" % (self.ip_srv_phy,self.ip_srv_phy))
-    name_vm_dest = self.exec_cmd("ssh root@%s hostname" % self.ip_srv_phy)
+    self.ssh.del_keyfile()
+    self.ssh.copy_id()
+    #self.exec_cmd("ssh-copy-id %s" % self.ip_srv_phy)
+    #name_vm_dest = self.exec_cmd("ssh root@%s hostname" % self.ip_srv_phy)
+    name_vm_dest = self.ssh.exec_cmd("hostname")
     self.name_vm_dest = name_vm_dest[0].strip()
     self.new_name_vm_ip = self.ip_srv_phy
     return self.name_vm_dest
