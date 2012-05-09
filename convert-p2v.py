@@ -1,6 +1,5 @@
 #!/usr/bin/python
 
-
 #from dialog  import *
 
 from p2v import xen_host
