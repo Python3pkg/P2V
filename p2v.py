@@ -23,8 +23,6 @@ class physical_host:
 
   def exec_cmd_ssh(self,cmd=''):
     result = self.ssh.exec_cmd(cmd)
-    #CMD = os.popen("ssh root@%s '%s'" % (self.server,cmd),"r")
-    #ret = CMD.readlines()
     return result
  
   def get_memory(self):
@@ -197,14 +195,10 @@ class xen_host:
       vgname = i.split()[-1].strip()
     self.vgname = vgname
 
-  #def get_name_vm_dest(self,name_vm_dest_ip):
   def get_name_vm_dest(self):
-    #self.exec_cmd("ssh-copy-id %s" % name_vm_dest_ip)
     self.exec_cmd("ssh-keygen -R %s ; ssh-copy-id %s" % (self.ip_srv_phy,self.ip_srv_phy))
-    #name_vm_dest = self.exec_cmd("ssh %s hostname" % name_vm_dest_ip)
     name_vm_dest = self.exec_cmd("ssh root@%s hostname" % self.ip_srv_phy)
     self.name_vm_dest = name_vm_dest[0].strip()
-    #self.new_name_vm_ip = name_vm_dest_ip
     self.new_name_vm_ip = self.ip_srv_phy
     return self.name_vm_dest
     
