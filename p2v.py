@@ -5,15 +5,27 @@ import os,re
 from operator import itemgetter
 import shutil
 
+class Ssh:
+  def __init__(self,server):
+    self.server = server
+
+  def exec_cmd(self,cmd=''):
+    CMD = os.popen("ssh root@%s '%s'" % (self.server,cmd),"r")
+    ret = CMD.readlines()
+    return ret
+
+
 class physical_host:
 
   def __init__(self,server):
     self.server = server
+    self.ssh = Ssh(self.server)
 
   def exec_cmd_ssh(self,cmd=''):
-    CMD = os.popen("ssh root@%s '%s'" % (self.server,cmd),"r")
-    ret = CMD.readlines()
-    return ret
+    result = self.ssh.exec_cmd(cmd)
+    #CMD = os.popen("ssh root@%s '%s'" % (self.server,cmd),"r")
+    #ret = CMD.readlines()
+    return result
  
   def get_memory(self):
     liste = self.exec_cmd_ssh('dmidecode -t memory | grep Size | grep MB')
