@@ -139,7 +139,7 @@ class physical_host:
     check_is_lv = self.exec_cmd_ssh('lvdisplay | grep \"%s\" | wc -l' % fs)
     if check_is_lv[0] >= 1:
       return true
-    else
+    else:
       return false
  
   def get_version_os(self):
