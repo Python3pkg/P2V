@@ -2,8 +2,6 @@ Outils permettant de convertir un serveur physique en serveur virtuel xen.
 
 Actuellement l'outils ne converti que des serveurs ubuntu et debian.
 
-
-
 Usage: %convert-p2v.py -f <FQDN>  [-i <IP>] | [-v <Num_VLAN>]
 
 Options:
