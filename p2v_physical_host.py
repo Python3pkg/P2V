@@ -121,7 +121,7 @@ class physical_host:
     Bl_size = self.exec_cmd_ssh('tune2fs -l '+ partition +' | grep "Block size"')
     Bloc_free = Bl_free[0].split(":")[1].strip()
     Bloc_size = Bl_size[0].split(":")[1].strip()
-    Taille_free = (int(Bloc_count) * int(Bloc_size))
+    Taille_free = (int(Bloc_free) * int(Bloc_size))
     return Taille_free
 
   def taux_occupation_ext(self,partition):
