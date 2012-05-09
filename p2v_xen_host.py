@@ -150,7 +150,7 @@ class xen_host:
           AFFICHE_DD += "mkswap -v1 /dev/"+ self.vgname +"/"+ nom_part +"-"+self.name_vm_dest+"\n"
         else:
           if self.P.is_lv(self.partitions[self.type_p2v][i][0]):
-          print "%s is LVM LV\n" % self.partitions[self.type_p2v][i][0]
+            print "%s is LVM LV\n" % self.partitions[self.type_p2v][i][0]
           AFFICHE_DD += "ssh -c arcfour root@"+ self.new_name_vm_ip +" 'dcfldd status=on sizeprobe=if statusinterval=100 if="+ self.partitions[self.type_p2v][i][0] +"' bs="+ self.bs +" | dd of=/dev/"+ self.vgname +"/"+ nom_part +"-"+self.name_vm_dest+" bs="+ self.bs +"\n"
     return AFFICHE_DD
 
