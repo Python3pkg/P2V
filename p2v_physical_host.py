@@ -127,7 +127,7 @@ class physical_host:
   def taux_occupation_ext(self,partition):
     taille_total = self.taille_part_ext(partition)
     taille_libre = self.taille_part_free_ext(partition)
-    tx_occup = (taille_libre * 100) / taille_total
+    tx_occup = 100 - ((taille_libre * 100) / taille_total)
     return tx_occup
 
 
