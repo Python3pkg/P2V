@@ -134,7 +134,14 @@ class physical_host:
       detect_lvm = "1"
     if detect_lvm == "1": 
       print "LVM detecte, en mode HVM, le LVM sera fait dans la VM."
-  
+ 
+  def is_lv(self,fs):
+    check_is_lv = self.exec_cmd_ssh('lvdisplay | grep \"%s\" | wc -l' % fs)
+    if check_is_lv[0] >= 1:
+      return true
+    else
+      return false
+ 
   def get_version_os(self):
     liste = self.exec_cmd_ssh('cat /etc/issue')
     os_version=[]
