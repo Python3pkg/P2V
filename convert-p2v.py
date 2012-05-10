@@ -3,7 +3,7 @@
 
 #from dialog  import *
 
-from p2v import xen_host
+import p2v_xen_host 
 import os,sys,shutil
 
 from optparse import OptionParser
