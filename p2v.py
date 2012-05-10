@@ -10,7 +10,7 @@ class Ssh:
     self.server = server
 
   def del_keyfile(self):
-     os.popen("ssh-keygen -R %s 2>&1 > dev/null" % self.server,"r")
+     os.popen("ssh-keygen -R %s" % self.server,"r")
 
   def copy_id(self):
      print "### Copie des clefs : ###\n"
@@ -319,7 +319,7 @@ class xen_host:
   def prep_cmd_ssh_key(self):
     AFFICHE_SSH = "\n"
     AFFICHE_SSH += "echo \"Password pour transfert de clefs ssh\"\n"
-    AFFICHE_SSH += "ssh-keygen -R "+ self.new_name_vm_ip +" 2>&1 > dev/null\n"
+    AFFICHE_SSH += "ssh-keygen -R "+ self.new_name_vm_ip +"\n"
     AFFICHE_SSH += "ssh-copy-id "+ self.new_name_vm_ip +""
     return AFFICHE_SSH
 
