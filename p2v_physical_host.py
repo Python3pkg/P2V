@@ -131,8 +131,9 @@ class physical_host:
     return tx_occup
 
 
-
-
+  def Convert_to_octects(self,taille):
+    """ converti Ko, Mo, Go  et To en octets """
+    
 
 
 
