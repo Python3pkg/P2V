@@ -12,24 +12,19 @@ class xen_host:
  
   def __init__(self,ip_srv_phy="",xenmgtconf=""):
     xenmgtconf={}
-    template_hvm={}
     execfile("/etc/xen/xenmgt-p2v.conf",xenmgtconf)
-    execfile(xenmgtconf["TEMPLATE_HVM"],template_hvm)
     self.xenmgtconf = xenmgtconf
-    self.template_hvm = template_hvm
     self.bs=self.xenmgtconf["DD_BS"]
     self.P = physical_host(ip_srv_phy)
     self.ip_srv_phy = ip_srv_phy
     self.ssh = Ssh(self.ip_srv_phy)
+    self.type_p2v="PARA"
 
   def exec_cmd(self,cmd=''):
     CMD = os.popen(cmd,"r")
     ret = CMD.readlines()
     return ret
 
-  def type_p2v(self,type):
-    self.type_p2v = type
-  
   def get_os_version(self):
     self.version_os = self.P.get_version_os()
     return self.version_os
@@ -43,16 +38,11 @@ class xen_host:
   def get_name_vm_dest(self):
     self.ssh.del_keyfile()
     self.ssh.copy_id()
-    #self.exec_cmd("ssh-copy-id %s" % self.ip_srv_phy)
-    #name_vm_dest = self.exec_cmd("ssh root@%s hostname" % self.ip_srv_phy)
     name_vm_dest = self.ssh.exec_cmd("hostname")
     self.name_vm_dest = name_vm_dest[0].strip()
     self.new_name_vm_ip = self.ip_srv_phy
     return self.name_vm_dest
     
-  #def get_name_srv_source(self,name_srv_source):
-  #  self.name_srv_source = name_srv_source
-
   def get_interfaces(self):
     self.interfaces = self.P.get_interfaces()
 
@@ -110,46 +100,36 @@ class xen_host:
   def prep_affiche_partitions(self):
     AFFICHE_PARTITIONS = "PARTITIONS :\n"
     for i in self.tri(self.partitions[self.type_p2v]):
-      if self.type_p2v == "HVM":
-        AFFICHE_PARTITIONS += " %s -> taille : %s\n" % (self.partitions[self.type_p2v][i][0],self.partitions[self.type_p2v][i][1])
-      if self.type_p2v == "PARA":
-        AFFICHE_PARTITIONS += " %s %s %s %s\n" % (self.partitions[self.type_p2v][i][0],self.partitions[self.type_p2v][i][1], self.partitions[self.type_p2v][i][2],self.partitions[self.type_p2v][i][3])
+      AFFICHE_PARTITIONS += " %s %s %s %s\n" % (self.partitions[self.type_p2v][i][0],self.partitions[self.type_p2v][i][1], self.partitions[self.type_p2v][i][2],self.partitions[self.type_p2v][i][3])
     return AFFICHE_PARTITIONS
 
   def prep_cmd_create_partitions(self):
     self.get_vgname()
     AFFICHE_CREATE_LV = "\n"
     for i in self.tri(self.partitions[self.type_p2v]):
-      if self.type_p2v == "HVM":
-        nom_partition = i.replace('/','-')
-        AFFICHE_CREATE_LV += "lvcreate -L %sB -n %s-%s %s\n" % (self.partitions[self.type_p2v][i][1],self.partitions[self.type_p2v][i][0],self.name_vm_dest,self.vgname)
-      if self.type_p2v == "PARA":
-        if self.partitions[self.type_p2v][i][3] == "/":
-          nom_part = "root"
-        elif self.partitions[self.type_p2v][i][1] == "swap":
-          nom_part = "swap"
-        else:
-          nom_part = self.partitions[self.type_p2v][i][3].replace("/","-")[1:]
-        AFFICHE_CREATE_LV += "lvcreate -L %sB -n %s-%s %s\n" % (self.partitions[self.type_p2v][i][2],nom_part,self.name_vm_dest,self.vgname)
+      if self.partitions[self.type_p2v][i][3] == "/":
+        nom_part = "root"
+      elif self.partitions[self.type_p2v][i][1] == "swap":
+        nom_part = "swap"
+      else:
+        nom_part = self.partitions[self.type_p2v][i][3].replace("/","-")[1:]
+      AFFICHE_CREATE_LV += "lvcreate -L %sB -n %s-%s %s\n" % (self.partitions[self.type_p2v][i][2],nom_part,self.name_vm_dest,self.vgname)
     return AFFICHE_CREATE_LV
 
   def prep_cmd_copy_dd(self):
     AFFICHE_DD = "\n"
     for i in self.tri(self.partitions[self.type_p2v]):
-      if self.type_p2v == "HVM":
-        AFFICHE_DD += "ssh -c arcfour root@"+ self.new_name_vm_ip +" 'dcfldd status=on sizeprobe=if statusinterval=100 if=/dev/"+ i +"' bs="+ self.bs +" | dd of=/dev/"+ self.vgname +"/"+ self.partitions[self.type_p2v][i][0] +"-"+self.name_vm_dest+" bs="+ self.bs +"\n"
-      if self.type_p2v == "PARA":
-        if self.partitions[self.type_p2v][i][3] == "/":
-          nom_part = "root"
-        elif self.partitions[self.type_p2v][i][1] == "swap":
-          nom_part = "swap"
-        else:
-          nom_part = self.partitions[self.type_p2v][i][3].replace("/","-")[1:]
-        AFFICHE_DD += "echo \"Copie de la partition "+ self.partitions[self.type_p2v][i][3] +"\"\n"
-        if self.partitions[self.type_p2v][i][3] == "swap":
-          AFFICHE_DD += "mkswap -v1 /dev/"+ self.vgname +"/"+ nom_part +"-"+self.name_vm_dest+"\n"
-        else:
-          AFFICHE_DD += "ssh -c arcfour root@"+ self.new_name_vm_ip +" 'dcfldd status=on sizeprobe=if statusinterval=100 if="+ self.partitions[self.type_p2v][i][0] +"' bs="+ self.bs +" | dd of=/dev/"+ self.vgname +"/"+ nom_part +"-"+self.name_vm_dest+" bs="+ self.bs +"\n"
+      if self.partitions[self.type_p2v][i][3] == "/":
+        nom_part = "root"
+      elif self.partitions[self.type_p2v][i][1] == "swap":
+        nom_part = "swap"
+      else:
+        nom_part = self.partitions[self.type_p2v][i][3].replace("/","-")[1:]
+      AFFICHE_DD += "echo \"Copie de la partition "+ self.partitions[self.type_p2v][i][3] +"\"\n"
+      if self.partitions[self.type_p2v][i][3] == "swap":
+        AFFICHE_DD += "mkswap -v1 /dev/"+ self.vgname +"/"+ nom_part +"-"+self.name_vm_dest+"\n"
+      else:
+        AFFICHE_DD += "ssh -c arcfour root@"+ self.new_name_vm_ip +" 'dcfldd status=on sizeprobe=if statusinterval=100 if="+ self.partitions[self.type_p2v][i][0] +"' bs="+ self.bs +" | dd of=/dev/"+ self.vgname +"/"+ nom_part +"-"+self.name_vm_dest+" bs="+ self.bs +"\n"
     return AFFICHE_DD
 
   def prep_cmd_ssh_key(self):
@@ -188,10 +168,7 @@ class xen_host:
   #############################################################
 
   def generate_conf_xen(self):
-    if self.type_p2v == "HVM":
-      GEN_CONF = self.generate_conf_xen_hvm()
-    if self.type_p2v == "PARA":
-      GEN_CONF = self.generate_conf_xen_para()
+    GEN_CONF = self.generate_conf_xen_para()
     return GEN_CONF
 
   def ecrit_conf_partitions(self):
@@ -199,16 +176,13 @@ class xen_host:
     count = len(self.partitions[self.type_p2v].keys())
     cpt=1
     for i in self.tri(self.partitions[self.type_p2v]):
-      if self.type_p2v == "HVM":
-        conf += "'phy:/dev/%s/%s-%s,%s,w'" % (self.vgname,self.partitions[self.type_p2v][i][0],self.name_vm_dest,self.partitions[self.type_p2v][i][0])
-      if self.type_p2v == "PARA":
-        if self.partitions[self.type_p2v][i][3] == "/":
-          nom_part = "root"
-        elif self.partitions[self.type_p2v][i][1] == "swap":
-          nom_part = "swap"
-        else:
-          nom_part = self.partitions[self.type_p2v][i][3].replace("/","-")[1:]
-        conf += "'phy:/dev/%s/%s-%s,%s,w'" % (self.vgname,nom_part,self.name_vm_dest,i)
+      if self.partitions[self.type_p2v][i][3] == "/":
+        nom_part = "root"
+      elif self.partitions[self.type_p2v][i][1] == "swap":
+        nom_part = "swap"
+      else:
+        nom_part = self.partitions[self.type_p2v][i][3].replace("/","-")[1:]
+      conf += "'phy:/dev/%s/%s-%s,%s,w'" % (self.vgname,nom_part,self.name_vm_dest,i)
       if cpt != int(count):
         conf += ",\n\t"
       cpt = (int(cpt) + 1)
@@ -226,28 +200,6 @@ class xen_host:
       cpt = (int(cpt) + 1)
     conf += "]"
     return conf
-
-
-  def uuid_gen(self):
-    uuid_gen = self.exec_cmd('uuidgen')
-    return uuid_gen[0].strip()
-
-  def generate_conf_xen_hvm(self):
-    self.ecrit_conf_partitions()
-    CONF_HVM = ""
-    for i in self.template_hvm.keys():
-      if i != "__builtins__":
-        if i == "vif":
-          CONF_HVM += ""+str(i)+" = "+ self.ecrit_conf_interfaces() +"\n"
-        elif i == "disk":
-          CONF_HVM += ""+str(i)+" = "+ self.ecrit_conf_partitions() +"\n"
-        elif i == "uuid":
-          CONF_HVM += ""+str(i)+" = \""+ self.uuid_gen() +"\"\n"
-        elif i == "name":
-          CONF_HVM += ""+str(i)+" = \""+ self.name_vm_dest +"\"\n"
-        else:
-          CONF_HVM += ""+str(i)+" = '"+ str(self.template_hvm[i]) +"'\n"
-    return CONF_HVM
 
   def ecrit_memory(self):
     return self.memory
@@ -395,7 +347,6 @@ class xen_host:
     print "Creation du repertoire /vhosts/%s" % name_vm_dest
     self.rep_vhosts_vm = "/vhosts/"+ name_vm_dest +""
     self.exec_cmd("mkdir -p %s" % self.rep_vhosts_vm)
-    #os.makedirs(self.rep_vhosts_vm)
 
   def modif_fstab(self):
     """ Genere le nouveau fichier fstab
