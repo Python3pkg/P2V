@@ -1,8 +1,5 @@
 #!/usr/bin/python
 
-
-#from dialog  import *
-
 from p2v_xen_host import xen_host
 import os,sys,shutil
 
@@ -56,8 +53,6 @@ if __name__ == "__main__":
 
   hote_xen = xen_host(ip_srv_phy=PHY_IP)
 
-  #hote_xen.get_name_srv_source(PHY_IP)
-  #PHYSICAL_NAME = hote_xen.get_name_vm_dest(PHY_IP)
   PHYSICAL_NAME = hote_xen.get_name_vm_dest()
   print PHYSICAL_NAME
 
