@@ -56,11 +56,7 @@ if __name__ == "__main__":
   PHYSICAL_NAME = hote_xen.get_name_vm_dest()
   print PHYSICAL_NAME
 
-  MENU_P2V = "PARA"
-
-  if MENU_P2V == "PARA":
-    hote_xen.type_p2v(MENU_P2V)
-    if hote_xen.is_created_cfg(VM_NAME):
-      P2V_HVM_PHASE_2(VM_NAME)
-    else:
-      P2V_HVM_PHASE_1(PHYSICAL_NAME,VM_NAME)
+  if hote_xen.is_created_cfg(VM_NAME):
+    P2V_HVM_PHASE_2(VM_NAME)
+  else:
+    P2V_HVM_PHASE_1(PHYSICAL_NAME,VM_NAME)
