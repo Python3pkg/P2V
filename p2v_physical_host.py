@@ -2,7 +2,7 @@
 
 
 import os,re
-import sshtools
+from sshtools from Ssh
 
 
 class physical_host:
