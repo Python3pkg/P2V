@@ -111,21 +111,7 @@ class physical_host:
   def get_all_partitions(self):
     ALL_PARTITIONS={}
     ALL_PARTITIONS["PARA"] = (self.get_partitions_para())
-    ALL_PARTITIONS["HVM"] = (self.get_partitions_hvm())
     return ALL_PARTITIONS
-
-  def get_partitions_hvm(self):
-    #self.detect_lvm()
-    cpt='`'
-    liste = self.exec_cmd_ssh('LANG=POSIX fdisk -l /dev/cciss/c0d0 2> /dev/null | grep "^Disk /dev" | grep -v "mapper" | sed "s/Disk//" | sed "s#/dev/##"')
-    PARTITION={}
-    for i in liste:
-       nom_part = i.split(":")[0].strip()
-       nom_part_hvm = "hd%s" % chr(ord(cpt) + 1)
-       taille = i.split(",")[1].split()[0]
-       PARTITION[nom_part] = (nom_part_hvm,taille)
-    return PARTITION
-    # {'cciss/c0d0': ('hda', '120034123776'),'cciss/c0d1': ('hdb', '120034123776')}
 
   def detect_lvm(self):
     detect_lvm = "0"
