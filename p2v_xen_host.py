@@ -4,8 +4,8 @@
 import os,re
 from operator import itemgetter
 import shutil
-import p2v_physical_host
-import sshtools
+from  p2v_physical_host import physical_host
+from sshtools import Ssh
 
 
 class xen_host:
