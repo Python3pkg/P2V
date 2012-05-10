@@ -151,7 +151,7 @@ class xen_host:
         else:
           ############# DETECTION POUR REDUCTION LV ET RESIZE FS ##################
           if self.P.is_lv(self.partitions[self.type_p2v][i][0]):
-            if self.partitions[self.type_p2v][i][0] > 10000000:
+            if self.partitions[self.type_p2v][i][2] > 15106127360:
               if self.P.taux_occupation(self.partitions[self.type_p2v][i][0],self.partitions[self.type_p2v][i][1]) < 20:
                 print "Elu pour la reduction"
                 print "%s is LVM LV" % self.partitions[self.type_p2v][i][0]
