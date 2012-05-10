@@ -617,7 +617,7 @@ class xen_host:
     print ""
     self.exec_cmd("echo \"xvc0\" >> %s/etc/securetty" % self.rep_vhosts_vm) 
     if os.path.isfile("%s/etc/inittab" % self.rep_vhosts_vm):
-      self.exec_cmd("echo \"co:123457:respawn:/sbin/getty 3800 xvc0\" >> %s/etc/inittab" % self.rep_vhosts_vm) 
+      self.exec_cmd("echo \"co:123457:respawn:/sbin/getty 38400 xvc0\" >> %s/etc/inittab" % self.rep_vhosts_vm) 
 
     if os.path.isfile("%s/etc/event.d/tty1" % self.rep_vhosts_vm):
       self.exec_cmd("cp %s/etc/event.d/tty1 %s/etc/event.d/xvc0" % (self.rep_vhosts_vm,self.rep_vhosts_vm))
