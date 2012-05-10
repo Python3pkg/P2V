@@ -48,6 +48,7 @@ class xen_host:
 
   def get_memory(self):
     self.memory = self.P.get_memory1()
+    return self.memory
 
   def get_partitions(self):
     self.partitions = self.P.get_all_partitions()
