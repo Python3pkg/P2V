@@ -132,13 +132,6 @@ class xen_host:
         AFFICHE_DD += "ssh -c arcfour root@"+ self.new_name_vm_ip +" 'dcfldd status=on sizeprobe=if statusinterval=100 if="+ self.partitions[self.type_p2v][i][0] +"' bs="+ self.bs +" | dd of=/dev/"+ self.vgname +"/"+ nom_part +"-"+self.name_vm_dest+" bs="+ self.bs +"\n"
     return AFFICHE_DD
 
-  def prep_cmd_ssh_key(self):
-    AFFICHE_SSH = "\n"
-    AFFICHE_SSH += "echo \"Password pour transfert de clefs ssh\"\n"
-    AFFICHE_SSH += "ssh-keygen -R "+ self.new_name_vm_ip +"\n"
-    AFFICHE_SSH += "ssh-copy-id "+ self.new_name_vm_ip +""
-    return AFFICHE_SSH
-
   def affiche_rapport(self):
     affiche = "---------- RAPPORT ----------\n"
     affiche += self.prep_affiche_os_version()
@@ -156,7 +149,6 @@ class xen_host:
 
   def get_exec_cmd(self):
     ecrit_cmd = ""
-    ecrit_cmd += self.prep_cmd_ssh_key()
     ecrit_cmd += self.prep_cmd_create_partitions()
     ecrit_cmd += self.prep_cmd_copy_dd()
     return ecrit_cmd
