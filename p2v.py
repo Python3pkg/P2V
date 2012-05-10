@@ -91,7 +91,7 @@ class physical_host:
 
   def get_partitions_para(self):
     self.get_idev()
-    liste = self.exec_cmd_ssh('cat /etc/fstab | grep ^/dev | grep -v iso9660 | grep -v vfat')
+    liste = self.exec_cmd_ssh('cat /etc/fstab | grep ^/dev | grep -v iso9660 | grep -v floppy | grep -v vfat')
     PARTITIONS={}
     cpt=1
     for i in liste:
