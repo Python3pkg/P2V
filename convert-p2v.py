@@ -30,10 +30,11 @@ def P2V_HVM_PHASE_2(VM):
 
 
 def analyse_commande():
-  parser = OptionParser(usage="%convert-p2v.py -f <FQDN>  [-i <IP>] | [-v <Num_VLAN>]", version="%prog 1.0")
+  parser = OptionParser(usage="%convert-p2v.py -f <FQDN>  [-i <IP>] | [-v <Num_VLAN>] | [-c <Num_Demande_Sysadmin>]_", version="%prog 1.0")
   parser.add_option("-f","--fqdn", action="store", type="string", dest="vm_name",help="FDQN du serveur physique a virtualiser", metavar="FQDN" )
   parser.add_option("-i", "--ip", action="store", type="string", dest="physique_name",default="1.1.1.2",help="IP de communication entre le xen0 et le serveur physique, defaut: 1.1.1.2", metavar="IP")
   parser.add_option("-v","--vlan", action="store", type="string", dest="vlan",help="VLAN Commun entre le xen et le serveur physique", metavar="Num VLAN")
+  parser.add_option("-s","--sysadmin", action="store", type="string", dest="dem_sysadmin",default="",help="Numero de demande sysadmin", metavar="Num DS")
   parser.set_defaults(PHY_NAME="1.1.1.2")
 
   (options, args) = parser.parse_args()
@@ -50,8 +51,9 @@ if __name__ == "__main__":
 
   PHY_IP = options.physique_name
   VM_NAME = options.vm_name
+  DS_SYSADMIN = options.dem_sysadmin
 
-  hote_xen = xen_host(ip_srv_phy=PHY_IP)
+  hote_xen = xen_host(ip_srv_phy=PHY_IP,ds=DS_SYSADMIN)
 
   PHYSICAL_NAME = hote_xen.get_name_vm_dest()
   print PHYSICAL_NAME
