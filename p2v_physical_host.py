@@ -99,7 +99,15 @@ class physical_host:
   def taille_part(self,partition,filesystem):
     if (filesystem == "ext2") or (filesystem == "ext3") or (filesystem == "ext4"):
       return self.taille_part_ext(partition)
+  
+  def taux_occupation(self,partition,filesystem):
+    if (filesystem == "ext2") or (filesystem == "ext3") or (filesystem == "ext4"):
+      return self.taux_occupation_ext(partition)
 
+
+  ######################################################################################
+  ###################  FONCTIONS RESERVER POUR FILESYSTEM EXT   ########################
+  ######################################################################################
   def taille_part_ext(self,partition):
     Bl_count = self.exec_cmd_ssh('tune2fs -l '+ partition +' | grep "Block count"')
     Bl_size = self.exec_cmd_ssh('tune2fs -l '+ partition +' | grep "Block size"')
@@ -107,7 +115,28 @@ class physical_host:
     Bloc_size = Bl_size[0].split(":")[1].strip()
     Taille = (int(Bloc_count) * int(Bloc_size))
     return Taille
- 
+  
+  def taille_part_free_ext(self,partition):
+    Bl_free = self.exec_cmd_ssh('tune2fs -l '+ partition +' | grep "Free blocks"')
+    Bl_size = self.exec_cmd_ssh('tune2fs -l '+ partition +' | grep "Block size"')
+    Bloc_free = Bl_free[0].split(":")[1].strip()
+    Bloc_size = Bl_size[0].split(":")[1].strip()
+    Taille_free = (int(Bloc_free) * int(Bloc_size))
+    return Taille_free
+
+  def taux_occupation_ext(self,partition):
+    taille_total = self.taille_part_ext(partition)
+    taille_libre = self.taille_part_free_ext(partition)
+    tx_occup = 100 - ((taille_libre * 100) / taille_total)
+    return tx_occup
+
+
+  def Convert_to_octects(self,taille):
+    """ converti Ko, Mo, Go  et To en octets """
+    
+
+
+
   def get_all_partitions(self):
     ALL_PARTITIONS={}
     ALL_PARTITIONS["PARA"] = (self.get_partitions_para())
@@ -120,7 +149,14 @@ class physical_host:
       detect_lvm = "1"
     if detect_lvm == "1": 
       print "LVM detecte, en mode HVM, le LVM sera fait dans la VM."
-  
+ 
+  def is_lv(self,fs):
+    check_is_lv = self.exec_cmd_ssh('lvdisplay | grep \"%s\" | wc -l' % fs)
+    if check_is_lv[0] >= 1:
+      return 1
+    else:
+      return 0
+ 
   def get_version_os(self):
     liste = self.exec_cmd_ssh('cat /etc/issue')
     os_version=[]
