@@ -19,6 +19,7 @@ class xen_host:
     self.ip_srv_phy = ip_srv_phy
     self.ssh = Ssh(self.ip_srv_phy)
     self.type_p2v="PARA"
+    self.type_vm="P2V"
     self.sysadmin = ds
 
   def exec_cmd(self,cmd=''):
@@ -251,7 +252,7 @@ class xen_host:
     return self.sysadmin
   
   def ecrit_type_vm(self):
-    return self.type_p2v
+    return self.type_vm
 
   def ecrit_extra(self):
     extra = "console=xvc0 elevator=noop"
