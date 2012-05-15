@@ -34,6 +34,7 @@ class xen_host:
     for i in liste:
       vgname = i.split()[-1].strip()
     self.vgname = vgname
+    return self.vgname
 
   def get_name_vm_dest(self):
     self.ssh.del_keyfile()
@@ -45,6 +46,7 @@ class xen_host:
     
   def get_interfaces(self):
     self.interfaces = self.P.get_interfaces()
+    return self.interfaces
 
   def get_memory(self):
     self.memory = self.P.get_memory1()
@@ -52,9 +54,11 @@ class xen_host:
 
   def get_partitions(self):
     self.partitions = self.P.get_all_partitions()
+    return self.partitions
   
   def get_cpu(self):
     self.cpu = self.P.get_cpu()
+    return self.cpu
 
   def get_info_srv_physique(self):
     self.get_os_version()
