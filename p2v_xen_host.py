@@ -153,6 +153,7 @@ class xen_host:
     affiche += self.prep_affiche_cpu()
     affiche += self.prep_affiche_network()
     affiche += self.prep_affiche_partitions()
+    self.affiche_rapport = affiche
     return affiche
 
   #####################################################  
@@ -308,6 +309,7 @@ class xen_host:
     self.set_fichier_p2v("sh",self.get_exec_cmd())
     self.set_fichier_p2v("cfg",self.generate_conf_xen())
     self.set_fichier_p2v("var",self.export_variables())
+    self.set_fichier_p2v("rapport",self.affiche_rapport)
 
 
 
