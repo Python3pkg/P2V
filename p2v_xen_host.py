@@ -202,7 +202,7 @@ class xen_host:
     for i in self.tri(self.interfaces):
       if self.version_os[1] == "3.1":
         conf += "'mac=%s , bridge=xenbr2003'" % self.interfaces[i]
-      else
+      else:
         conf += "'bridge=xenbr2003'"
       if cpt != int(count):
         conf += ","
