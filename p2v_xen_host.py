@@ -10,7 +10,7 @@ from sshtools import Ssh
 
 class xen_host:
  
-  def __init__(self,ip_srv_phy="",xenmgtconf=""):
+  def __init__(self,ip_srv_phy="",xenmgtconf="",ds=""):
     xenmgtconf={}
     execfile("/etc/xen/xenmgt-p2v.conf",xenmgtconf)
     self.xenmgtconf = xenmgtconf
@@ -19,6 +19,7 @@ class xen_host:
     self.ip_srv_phy = ip_srv_phy
     self.ssh = Ssh(self.ip_srv_phy)
     self.type_p2v="PARA"
+    self.sysadmin = ds
 
   def exec_cmd(self,cmd=''):
     CMD = os.popen(cmd,"r")
@@ -246,6 +247,12 @@ class xen_host:
   def ecrit_name_vm_dest(self):
     return self.name_vm_dest
 
+  def ecrit_num_sysadmin(self):
+    return self.sysadmin
+  
+  def ecrit_type_vm(self):
+    return self.type_p2v
+
   def ecrit_extra(self):
     extra = "console=xvc0 elevator=noop"
     return extra
@@ -285,9 +292,10 @@ class xen_host:
     CONF_PARA += "vif = "+ self.ecrit_conf_interfaces() +"\n"
     CONF_PARA += "disk = "+ self.ecrit_conf_partitions() +"\n"
     CONF_PARA += "root = \""+ self.ecrit_root_kernel() +"\"\n"
-    CONF_PARA += "extra = \""+ self.ecrit_extra() +"\"\n"
+    CONF_PARA += "extra = \""+ self.ecrit_extra() +"\"\n\n"
+    CONF_PARA += "#SYSADMIN=\""+ self.ecrit_num_sysadmin() +"\"\n"
+    CONF_PARA += "#VMTYPE=\""+ self.ecrit_type_vm() +"\"\n"
     return CONF_PARA
-
 
   ###########################################################  
   ### FIN GENERATION DU FICHIER DE CONF XEN (HVM OU PARA) ###
