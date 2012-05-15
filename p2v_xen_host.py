@@ -200,7 +200,7 @@ class xen_host:
     count = len(self.interfaces.keys())
     cpt=1
     for i in self.tri(self.interfaces):
-      conf += "'mac=%s , bridge=xenbr2006'" % self.interfaces[i]
+      conf += "'mac=%s , bridge=xenbr2003'" % self.interfaces[i]
       if cpt != int(count):
         conf += ","
       cpt = (int(cpt) + 1)
