@@ -200,7 +200,10 @@ class xen_host:
     count = len(self.interfaces.keys())
     cpt=1
     for i in self.tri(self.interfaces):
-      conf += "'mac=%s , bridge=xenbr2003'" % self.interfaces[i]
+      if self.version_os[1] == "3.1":
+        conf += "'mac=%s , bridge=xenbr2003'" % self.interfaces[i]
+      else
+        conf += "'bridge=xenbr2003'"
       if cpt != int(count):
         conf += ","
       cpt = (int(cpt) + 1)
@@ -367,6 +370,11 @@ class xen_host:
     fichier.write(line)
     fichier.close()
 
+  def modif_devpts(self):
+    if version_os[1] == "3.1":
+      self.exec_cmd("if [ $(grep \"/bin/mkdir -p /dev/pts\" %s/etc/init.d/mountvirtfs | wc -l) -eq 0 ] ; then sed -i '/domount sysfs \"\" \/sys/a \/bin\/mkdir -p \/dev\/pts' %s/etc/init.d/mountvirtfs ; else echo \"\" ; fi" % (self.rep_vhosts_vm,self.rep_vhosts_vm))
+      self.exec_cmd("echo \"none\t /dev/pts\t devpts\t gid=5,mode=620\t 0\t 0\" >> %s/etc/fstab" % self.rep_vhosts_vm)
+
   def modif_network(self):
     """ Genere le nouveau fichier network (En cours)
     """
@@ -442,6 +450,7 @@ class xen_host:
     self.set_ntp_sysctl()
     self.set_console_xen()
     self.set_modprobe()
+    self.modif_devpts()
     self.umount_root_vm()
     self.auto_vm()
 
