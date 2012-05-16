@@ -39,7 +39,8 @@ def analyse_commande():
 
   (options, args) = parser.parse_args()
   if options.vm_name == None:
-    print "Option manquante"
+    print "Option manquante\n"
+    os.system("./convert-p2v.py --help")
     sys.exit()
   return (options, args)
 
