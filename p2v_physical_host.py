@@ -64,7 +64,7 @@ class physical_host:
   def get_idev(self):
     version = self.get_version_os()
     if version[0] == "CentOS":
-      self.idev="cvda"
+      self.idev="xvda"
     if version[0] == "Ubuntu":
       self.idev="xvda"
     if version[0] == "Debian":
