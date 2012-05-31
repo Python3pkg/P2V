@@ -398,11 +398,11 @@ class xen_host:
     """
     print "copie du module necessaire"
     if version_os[0] == "Ubuntu":
-      self.exec_cmd("cp -rpdf /lib/modules/2.6.37* %s/lib/modules/" % self.rep_vhosts_vm)
+      self.exec_cmd("cp -rpdf /lib/modules/2.6.37* %s/lib/modules/" % (self.xenmgtconf["KERNEL_UBUNTU"].split("/boot/vmlinuz-")[1],self.rep_vhosts_vm))
     if version_os[0] == "Debian":
-      self.exec_cmd("cp -rpdf /lib/modules/2.6.18-149* %s/lib/modules/" % self.rep_vhosts_vm)
+      self.exec_cmd("cp -rpdf /lib/modules/2.6.18-149* %s/lib/modules/" % (self.xenmgtconf["KERNEL_DEBIAN"].split("/boot/vmlinuz-")[1],self.rep_vhosts_vm))
     if version_os[0] == "CentOS":
-      self.exec_cmd("cp -rpdf /lib/modules/2.6.18-149* %s/lib/modules/" % self.rep_vhosts_vm)
+      self.exec_cmd("cp -rpdf /lib/modules/%s %s/lib/modules/" % (self.xenmgtconf["KERNEL_CENTOS"].split("/boot/vmlinuz-")[1],self.rep_vhosts_vm))
 
   def set_ntp_sysctl(self):
     """ Modifie le sysctl pour la correction du ntp
