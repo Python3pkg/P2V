@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 
-import os,re
+import os,re, time
 from operator import itemgetter
 import shutil
 from  p2v_physical_host import physical_host
@@ -449,6 +449,8 @@ class xen_host:
 
   def copy_conf_to_xen(self):
     shutil.copy("/etc/xen/P2V/"+ name_vm_dest +"/"+ name_vm_dest +".cfg","/etc/xen/vm/"+ name_vm_dest +"")
+    date_generate_p2v = time.strtime('%d/%m/%y %H:%M', time.localtime())
+    self.exec_cmd("echo \"### P2V généré a "+ date_generate_p2v +"\" >> /etc/xen/vm/"+ name_vm_dest +"")
 
   def post_install(self):
     self.copy_conf_to_xen()
