@@ -372,7 +372,8 @@ class xen_host:
     """
     print "preparation du fichier fstab"
     self.exec_cmd("cp %s/etc/fstab %s/etc/fstab.pre.p2v" % (self.rep_vhosts_vm,self.rep_vhosts_vm))
-    line = open("/vhosts/"+ name_vm_dest +"/etc/fstab.pre.p2v","r").read()
+    self.exec_cmd("cp %s/etc/fstab_without_uuid %s/etc/fstab" % (self.rep_vhosts_vm,self.rep_vhosts_vm))
+    line = open("/vhosts/"+ name_vm_dest +"/etc/fstab_without_uuid","r").read()
     for i in self.tri(partitions[type_p2v]):
         line = line.replace(partitions[type_p2v][i][0],"/dev/%s" % i,1)
     fichier = open("/vhosts/"+ name_vm_dest +"/etc/fstab","w")
