@@ -1,8 +1,5 @@
 #!/usr/bin/python
 
-
-#from dialog  import *
-
 from p2v_xen_host import xen_host
 import os,sys,shutil
 
@@ -33,15 +30,17 @@ def P2V_HVM_PHASE_2(VM):
 
 
 def analyse_commande():
-  parser = OptionParser(usage="%xenmgt-p2v-console.py -f <FQDN>  [-i <IP>] | [-v <Num_VLAN>]", version="%prog 1.0")
+  parser = OptionParser(usage="%convert-p2v.py -f <FQDN>  [-i <IP>] | [-v <Num_VLAN>] | [-c <Num_Demande_Sysadmin>]", version="%prog 1.0")
   parser.add_option("-f","--fqdn", action="store", type="string", dest="vm_name",help="FDQN du serveur physique a virtualiser", metavar="FQDN" )
   parser.add_option("-i", "--ip", action="store", type="string", dest="physique_name",default="1.1.1.2",help="IP de communication entre le xen0 et le serveur physique, defaut: 1.1.1.2", metavar="IP")
   parser.add_option("-v","--vlan", action="store", type="string", dest="vlan",help="VLAN Commun entre le xen et le serveur physique", metavar="Num VLAN")
+  parser.add_option("-s","--sysadmin", action="store", type="string", dest="dem_sysadmin",default="",help="Numero de demande sysadmin", metavar="Num DS")
   parser.set_defaults(PHY_NAME="1.1.1.2")
 
   (options, args) = parser.parse_args()
   if options.vm_name == None:
-    print "Option manquante"
+    print "Option manquante\n"
+    os.system("./convert-p2v.py --help")
     sys.exit()
   return (options, args)
 
@@ -53,19 +52,14 @@ if __name__ == "__main__":
 
   PHY_IP = options.physique_name
   VM_NAME = options.vm_name
+  DS_SYSADMIN = options.dem_sysadmin
 
-  hote_xen = xen_host(ip_srv_phy=PHY_IP)
+  hote_xen = xen_host(ip_srv_phy=PHY_IP,ds=DS_SYSADMIN)
 
-  #hote_xen.get_name_srv_source(PHY_IP)
-  #PHYSICAL_NAME = hote_xen.get_name_vm_dest(PHY_IP)
   PHYSICAL_NAME = hote_xen.get_name_vm_dest()
   print PHYSICAL_NAME
 
-  MENU_P2V = "PARA"
-
-  if MENU_P2V == "PARA":
-    hote_xen.type_p2v(MENU_P2V)
-    if hote_xen.is_created_cfg(VM_NAME):
-      P2V_HVM_PHASE_2(VM_NAME)
-    else:
-      P2V_HVM_PHASE_1(PHYSICAL_NAME,VM_NAME)
+  if hote_xen.is_created_cfg(VM_NAME):
+    P2V_HVM_PHASE_2(VM_NAME)
+  else:
+    P2V_HVM_PHASE_1(PHYSICAL_NAME,VM_NAME)

@@ -64,7 +64,7 @@ class physical_host:
   def get_idev(self):
     version = self.get_version_os()
     if version[0] == "CentOS":
-      self.idev="cvda"
+      self.idev="xvda"
     if version[0] == "Ubuntu":
       self.idev="xvda"
     if version[0] == "Debian":
@@ -73,7 +73,7 @@ class physical_host:
 
   def get_partitions_para(self):
     self.get_idev()
-    liste = self.exec_cmd_ssh('cat /etc/fstab | grep ^/dev | grep -v iso9660 | grep -v floppy | grep -v vfat')
+    liste = self.exec_cmd_ssh('cat /etc/fstab | grep ^/dev | grep -v iso9660 | grep -v floppy | grep -v vfat | grep -v cdrom')
     PARTITIONS={}
     cpt=1
     for i in liste:
@@ -99,7 +99,15 @@ class physical_host:
   def taille_part(self,partition,filesystem):
     if (filesystem == "ext2") or (filesystem == "ext3") or (filesystem == "ext4"):
       return self.taille_part_ext(partition)
+  
+  def taux_occupation(self,partition,filesystem):
+    if (filesystem == "ext2") or (filesystem == "ext3") or (filesystem == "ext4"):
+      return self.taux_occupation_ext(partition)
 
+
+  ######################################################################################
+  ###################  FONCTIONS RESERVER POUR FILESYSTEM EXT   ########################
+  ######################################################################################
   def taille_part_ext(self,partition):
     Bl_count = self.exec_cmd_ssh('tune2fs -l '+ partition +' | grep "Block count"')
     Bl_size = self.exec_cmd_ssh('tune2fs -l '+ partition +' | grep "Block size"')
@@ -107,25 +115,32 @@ class physical_host:
     Bloc_size = Bl_size[0].split(":")[1].strip()
     Taille = (int(Bloc_count) * int(Bloc_size))
     return Taille
- 
+  
+  def taille_part_free_ext(self,partition):
+    Bl_free = self.exec_cmd_ssh('tune2fs -l '+ partition +' | grep "Free blocks"')
+    Bl_size = self.exec_cmd_ssh('tune2fs -l '+ partition +' | grep "Block size"')
+    Bloc_free = Bl_free[0].split(":")[1].strip()
+    Bloc_size = Bl_size[0].split(":")[1].strip()
+    Taille_free = (int(Bloc_free) * int(Bloc_size))
+    return Taille_free
+
+  def taux_occupation_ext(self,partition):
+    taille_total = self.taille_part_ext(partition)
+    taille_libre = self.taille_part_free_ext(partition)
+    tx_occup = 100 - ((taille_libre * 100) / taille_total)
+    return tx_occup
+
+
+  def Convert_to_octects(self,taille):
+    """ converti Ko, Mo, Go  et To en octets """
+    
+
+
+
   def get_all_partitions(self):
     ALL_PARTITIONS={}
     ALL_PARTITIONS["PARA"] = (self.get_partitions_para())
-    ALL_PARTITIONS["HVM"] = (self.get_partitions_hvm())
     return ALL_PARTITIONS
-
-  def get_partitions_hvm(self):
-    #self.detect_lvm()
-    cpt='`'
-    liste = self.exec_cmd_ssh('LANG=POSIX fdisk -l /dev/cciss/c0d0 2> /dev/null | grep "^Disk /dev" | grep -v "mapper" | sed "s/Disk//" | sed "s#/dev/##"')
-    PARTITION={}
-    for i in liste:
-       nom_part = i.split(":")[0].strip()
-       nom_part_hvm = "hd%s" % chr(ord(cpt) + 1)
-       taille = i.split(",")[1].split()[0]
-       PARTITION[nom_part] = (nom_part_hvm,taille)
-    return PARTITION
-    # {'cciss/c0d0': ('hda', '120034123776'),'cciss/c0d1': ('hdb', '120034123776')}
 
   def detect_lvm(self):
     detect_lvm = "0"
@@ -134,7 +149,22 @@ class physical_host:
       detect_lvm = "1"
     if detect_lvm == "1": 
       print "LVM detecte, en mode HVM, le LVM sera fait dans la VM."
-  
+
+  def detect_lvdisplay(self):
+    detect = self.exec_cmd_ssh('which lvdisplay | wc -l')
+    return detect[0]
+
+ 
+  def is_lv(self,fs):
+    if self.detect_lvdisplay() != 0:
+      check_is_lv = self.exec_cmd_ssh('lvdisplay | grep \"%s\" | wc -l' % fs)
+      if check_is_lv[0] >= 1:
+        return 1
+      else:
+        return 0
+    else:
+      return 0
+ 
   def get_version_os(self):
     liste = self.exec_cmd_ssh('cat /etc/issue')
     os_version=[]
