@@ -71,9 +71,25 @@ class physical_host:
       self.idev="hda"
     return self.idev
 
+  def copy_fstab(self):
+    copy_file_fstab = self.exec_cmd_ssh('cp /etc/fstab /etc/fstab_without_uuid')
+
+  def cible_link_uuid(self,uuid):
+    nom_device = os.path.normpath(os.path.join(os.path.dirname('/dev/disk/by-uuid/%s' % uuid),os.readlink('/dev/disk/by-uuid/%s' % uuid)))
+    return nom_device
+
+  def get_fstab_without_uuid(self):
+    self.copy_fstab()
+    liste = self.exec_cmd_ssh('cat /etc/fstab | grep ^UUID')
+    for i in liste:
+      uuid = i.split()[0].split('=')[1]
+      cible = self.cible_link_uuid(uuid)
+      self.exec_cmd_ssh('sed -i s#UUID=%s#%s# /etc/fstab_without_uuid' % (uuid,cible))
+
   def get_partitions_para(self):
     self.get_idev()
-    liste = self.exec_cmd_ssh('cat /etc/fstab | grep ^/dev | grep -v iso9660 | grep -v floppy | grep -v vfat | grep -v cdrom')
+    self.get_fstab_without_uuid()
+    liste = self.exec_cmd_ssh('cat /etc/fstab_without_uuid | grep ^/dev | grep -v iso9660 | grep -v floppy | grep -v vfat | grep -v cdrom')
     PARTITIONS={}
     cpt=1
     for i in liste:
