@@ -399,9 +399,9 @@ class xen_host:
     """
     print "copie du module necessaire"
     if version_os[0] == "Ubuntu":
-      self.exec_cmd("cp -rpdf /lib/modules/2.6.37* %s/lib/modules/" % (self.xenmgtconf["KERNEL_UBUNTU"].split("/boot/vmlinuz-")[1],self.rep_vhosts_vm))
+      self.exec_cmd("cp -rpdf /lib/modules/%s %s/lib/modules/" % (self.xenmgtconf["KERNEL_UBUNTU"].split("/boot/vmlinuz-")[1],self.rep_vhosts_vm))
     if version_os[0] == "Debian":
-      self.exec_cmd("cp -rpdf /lib/modules/2.6.18-149* %s/lib/modules/" % (self.xenmgtconf["KERNEL_DEBIAN"].split("/boot/vmlinuz-")[1],self.rep_vhosts_vm))
+      self.exec_cmd("cp -rpdf /lib/modules/%s %s/lib/modules/" % (self.xenmgtconf["KERNEL_DEBIAN"].split("/boot/vmlinuz-")[1],self.rep_vhosts_vm))
     if version_os[0] == "CentOS":
       self.exec_cmd("cp -rpdf /lib/modules/%s %s/lib/modules/" % (self.xenmgtconf["KERNEL_CENTOS"].split("/boot/vmlinuz-")[1],self.rep_vhosts_vm))
 
@@ -449,8 +449,8 @@ class xen_host:
 
   def copy_conf_to_xen(self):
     shutil.copy("/etc/xen/P2V/"+ name_vm_dest +"/"+ name_vm_dest +".cfg","/etc/xen/vm/"+ name_vm_dest +"")
-    date_generate_p2v = time.strtime('%d/%m/%y %H:%M', time.localtime())
-    self.exec_cmd("echo \"### P2V généré a "+ date_generate_p2v +"\" >> /etc/xen/vm/"+ name_vm_dest +"")
+    date_generate_p2v = time.strftime("%d/%m/%y %H:%M", time.localtime())
+    self.exec_cmd("echo \"### P2V genere a %s \" >> /etc/xen/vm/%s" % (date_generate_p2v,name_vm_dest))
 
   def post_install(self):
     self.copy_conf_to_xen()
