@@ -75,7 +75,7 @@ class physical_host:
     copy_file_fstab = self.exec_cmd_ssh('cp /etc/fstab /etc/fstab_without_uuid')
 
   def cible_link_uuid(self,uuid):
-    nom_device = os.path.normpath(os.path.join(os.path.dirname('/dev/disk/by-uuid/%s' % uuid),os.readlink('/dev/disk/by-uuid/%s' % uuid)))
+    nom_device = self.exec_cmd_ssh('readlink -f /dev/disk/by-uuid/%s' % uuid)
     return nom_device
 
   def get_fstab_without_uuid(self):
@@ -84,7 +84,7 @@ class physical_host:
     for i in liste:
       uuid = i.split()[0].split('=')[1]
       cible = self.cible_link_uuid(uuid)
-      self.exec_cmd_ssh('sed -i s#UUID=%s#%s# /etc/fstab_without_uuid' % (uuid,cible))
+      self.exec_cmd_ssh('sed -i s#UUID=%s#%s# /etc/fstab_without_uuid' % (uuid,cible[0].strip()))
 
   def get_partitions_para(self):
     self.get_idev()
