@@ -37,6 +37,7 @@ def analyse_commande():
   #parser.add_option("-v","--vlan", action="store", type="string", dest="vlan",help="VLAN Commun entre le xen et le serveur physique", metavar="Num VLAN")
   parser.add_option("-v","--vg", action="store", type="string", dest="vg_name",default="LVM_XEN",help="Nom du VG sur le serveur xen, defaut : LVM_XEN", metavar="VG")
   parser.add_option("-s","--sysadmin", action="store", type="string", dest="dem_sysadmin",default="",help="Numero de demande sysadmin", metavar="Num DS")
+  parser.add_option("-e","--eligibility", action="store", type="string", dest="eligibility",default="",help="test d'eligibilité, permettant de verifier si le serveur physique est eligible pour le P2V", metavar="Eligibility")
   parser.set_defaults(PHY_NAME="1.1.1.2")
 
   (options, args) = parser.parse_args()
