@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 
-import os,re, time
+import os,sys, re, time
 from operator import itemgetter
 import shutil
 from  p2v_physical_host import physical_host
@@ -10,7 +10,7 @@ from sshtools import Ssh
 
 class xen_host:
  
-  def __init__(self,ip_srv_phy="",xenmgtconf="",ds=""):
+  def __init__(self,ip_srv_phy="",xenmgtconf="",ds="",vg_name=""):
     xenmgtconf={}
     execfile("/etc/xen/xenmgt-p2v.conf",xenmgtconf)
     self.xenmgtconf = xenmgtconf
@@ -21,6 +21,7 @@ class xen_host:
     self.type_p2v="PARA"
     self.type_vm="P2V"
     self.sysadmin = ds
+    self.vgname = vg_name
 
   def exec_cmd(self,cmd=''):
     CMD = os.popen(cmd,"r")
@@ -31,12 +32,14 @@ class xen_host:
     self.version_os = self.P.get_version_os()
     return self.version_os
 
-  def get_vgname(self):
-    liste = self.exec_cmd('vgdisplay | grep Name')
-    for i in liste:
-      vgname = i.split()[-1].strip()
-    self.vgname = vgname
-    return self.vgname
+  def check_vgname(self):
+    liste = self.exec_cmd('vgdisplay | grep Name | grep %s | wc -l' % self.vgname)
+    vg = liste[0].strip()
+    if vg == "1":
+      return self.vgname
+    else:
+      print "!!!ERROR !!! Le VG %s n'existe pas, utiliser l'option --vg=<VG_NAME> par defaut c'est LVM_XEN" % self.vgname
+      sys.exit()
 
   def get_name_vm_dest(self):
     self.ssh.del_keyfile()
@@ -111,7 +114,6 @@ class xen_host:
     return AFFICHE_PARTITIONS
 
   def prep_cmd_create_partitions(self):
-    self.get_vgname()
     AFFICHE_CREATE_LV = "\n"
     for i in self.tri(self.partitions[self.type_p2v]):
       if self.partitions[self.type_p2v][i][3] == "/":
