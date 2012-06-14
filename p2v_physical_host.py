@@ -14,7 +14,7 @@ class physical_host:
   def exec_cmd_ssh(self,cmd=''):
     result = self.ssh.exec_cmd(cmd)
     return result
- 
+  
   def get_memory(self):
     liste = self.exec_cmd_ssh('dmidecode -t memory | grep Size | grep MB')
     somme=0
@@ -192,3 +192,30 @@ class physical_host:
       os_version = [liste[0].split()[0],liste[0].split()[2]]
     return os_version
 
+  def get_eligibility_check_fstab(self):
+    CHECK_LABEL = self.exec_cmd_ssh('less /etc/fstab | grep ^LABEL= | wc -l')
+    CHECK_LABEL = CHECK_LABEL[0].strip()
+    if CHECK_LABEL == "0":
+      ret = 1
+    else:
+      ret = 0
+    return ret
+
+  def get_eligibility_check_fs_ext(self):
+    CHECK_FS_EXT = self.exec_cmd_ssh('df -x tmpfs -x swap -x proc -x sys -x ext2 -x ext3 -x ext4 2>/dev/null | wc -l')
+    CHECK_FS_EXT = CHECK_FS_EXT[0].strip()
+    if CHECK_FS_EXT == "0":
+      ret = 1
+    else:
+      ret = 0
+    return ret
+
+  def get_eligibility_check_network_file_p2v(self):
+    CHECK_NETWORK_FILE_P2V = self.exec_cmd_ssh('ls /etc/network/interfaces.prep.p2v 2>/dev/null | wc -l')
+    CHECK_NETWORK_FILE_P2V = CHECK_NETWORK_FILE_P2V[0].strip()
+    if CHECK_NETWORK_FILE_P2V == "1":
+      ret = 1
+    else:
+      ret = 0
+    return ret
+    

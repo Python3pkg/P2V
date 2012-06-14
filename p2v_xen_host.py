@@ -77,6 +77,69 @@ class xen_host:
     return self.is_livecd
 
 
+  #######################################################
+  ###               ELIGIBILITY                       ###
+  #######################################################
+
+  def get_eligibility(self):
+    self.eligibility_check_fstab = self.P.get_eligibility_check_fstab()
+    self.eligibility_check_fs_ext = self.P.get_eligibility_check_fs_ext()
+    self.eligibility_check_network_file_p2v = self.P.get_eligibility_check_network_file_p2v()
+
+  def rapport_eligibility_header(self):
+    RAPPORT_HEADER = "\n##########################################\n"
+    RAPPORT_HEADER += "######## RAPPORT D'ELIGIBILITE ###########\n"
+    RAPPORT_HEADER += "##########################################"
+    print RAPPORT_HEADER
+
+  def rapport_eligibility_fstab(self):
+    RAPPORT_FSTAB = "\n*\n"
+    if self.eligibility_check_fstab == 1:
+      RAPPORT_FSTAB += "* Check fstab : OK\n"
+    else:
+      RAPPORT_FSTAB += "* Check fstab : NOK\n"
+      RAPPORT_FSTAB += "* !!! Le fichier /etc/fstab contient un ou plusieurs LABEL\n"
+      RAPPORT_FSTAB += "* Veuillez remplacer les entrees LABEL par les devices correspondant\n"
+    RAPPORT_FSTAB += "*\n"
+    print RAPPORT_FSTAB
+
+  def rapport_eligibility_fs_ext(self):
+    RAPPORT_FSEXT = "*\n"
+    if self.eligibility_check_fs_ext == 1:
+      RAPPORT_FSEXT += "* Check FileSystem : OK\n"
+    else:
+      RAPPORT_FSEXT += "* Check FileSystem : NOK\n"
+      RAPPORT_FSEXT += "* !!! Une ou plusieurs partitions contienent un FileSystem different de ext2,3,4\n"
+    RAPPORT_FSEXT += "*\n"
+    print RAPPORT_FSEXT
+
+  def rapport_eligibility_network(self):
+    RAPPORT_NETWORK = "*\n"
+    if self.eligibility_check_network_file_p2v == 1:
+      RAPPORT_NETWORK += "* Check Network : OK\n"
+    else:
+      RAPPORT_NETWORK += "* Check Network : NOK\n"
+      RAPPORT_NETWORK += "* !!! Copiez votre fichier '/etc/network/interfaces' en '/etc/network/interfaces.pre.p2v' en supprimant les vlans\n"
+    RAPPORT_NETWORK += "*\n"
+    print RAPPORT_NETWORK
+
+  def rapport_eligibility_result(self):
+    somme = (self.eligibility_check_fstab + self.eligibility_check_fs_ext + self.eligibility_check_network_file_p2v)
+    if somme == 3:
+      print "* le Serveur est eligible\n"
+    else:
+      print "* !!! Le serveur n'est pas eligible !!!\n"
+
+  def rapport_eligibility(self):
+    self.rapport_eligibility_header()
+    self.rapport_eligibility_fstab()
+    self.rapport_eligibility_fs_ext()
+    self.rapport_eligibility_network() 
+    self.rapport_eligibility_result()
+
+  #######################################################
+  ###              FIN   ELIGIBILITY                  ###
+  #######################################################
 
 
   #######################################################  
@@ -394,7 +457,8 @@ class xen_host:
     if version_os[0] == "CentOS":
       self.exec_cmd("cp %s/etc/sysconfig/network_scripts/ifcfg-eth0 %s/etc/sysconfig/network_scripts/ifcfg-eth0.pre.p2v" % (self.rep_vhosts_vm,self.rep_vhosts_vm))
     else:
-      self.exec_cmd("cp %s/etc/network/interfaces %s/etc/network/interfaces.pre.p2v" % (self.rep_vhosts_vm,self.rep_vhosts_vm))
+      self.exec_cmd("cp %s/etc/network/interfaces %s/etc/network/interfaces.post.p2v" % (self.rep_vhosts_vm,self.rep_vhosts_vm))
+      self.exec_cmd("cp %s/etc/network/interfaces.pre.p2v %s/etc/network/interfaces" % (self.rep_vhosts_vm,self.rep_vhosts_vm))
 
   def copie_modules(self):
     """ copie du module 2.6.37 ou 2.6.18.149
