@@ -211,7 +211,7 @@ class physical_host:
     return ret
 
   def get_eligibility_check_network_file_p2v(self):
-    CHECK_NETWORK_FILE_P2V = self.exec_cmd_ssh('ls /etc/network/interfaces.prep.p2v 2>/dev/null | wc -l')
+    CHECK_NETWORK_FILE_P2V = self.exec_cmd_ssh('ls /etc/network/interfaces.pre.p2v 2>/dev/null | wc -l')
     CHECK_NETWORK_FILE_P2V = CHECK_NETWORK_FILE_P2V[0].strip()
     if CHECK_NETWORK_FILE_P2V == "1":
       ret = 1
