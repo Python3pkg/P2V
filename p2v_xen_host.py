@@ -147,7 +147,7 @@ class xen_host:
   #######################################################
       
   def prep_affiche_os_version(self):
-    AFFICHE_OS_VERSION = "OS : %s %s\n\n" % (self.version_os[0],self.version_os[1]) 
+    AFFICHE_OS_VERSION = "OS : %s %s\n\n" % (self.version_os["OS"],self.version_os["VERSION"]) 
     return AFFICHE_OS_VERSION
   
   def prep_affiche_vm_name(self):
@@ -267,7 +267,7 @@ class xen_host:
     count = len(self.interfaces.keys())
     cpt=1
     for i in self.tri(self.interfaces):
-      if self.version_os[1] == "3.1":
+      if self.version_os["VERSION"] == "3.1":
         conf += "'mac=%s , bridge=xenbr2003'" % self.interfaces[i]
       else:
         conf += "'bridge=xenbr2003'"
@@ -333,10 +333,10 @@ class xen_host:
 
   def get_kernel(self):
     self.kernel_vm=[]
-    if self.version_os[0] == "Ubuntu":
+    if self.version_os["OS"] == "Ubuntu":
       kernel = self.xenmgtconf["KERNEL_UBUNTU"]
       initrd = self.xenmgtconf["INITRD_UBUNTU"]
-    elif self.version_os[0] == "Debian":
+    elif self.version_os["OS"] == "Debian":
       kernel = self.xenmgtconf["KERNEL_DEBIAN"]
       initrd = self.xenmgtconf["INITRD_DEBIAN"]
     else:
@@ -446,7 +446,7 @@ class xen_host:
     fichier.close()
 
   def modif_devpts(self):
-    if version_os[1] == "3.1":
+    if version_os["VERSION"] == "3.1":
       self.exec_cmd("if [ $(grep \"/bin/mkdir -p /dev/pts\" %s/etc/init.d/mountvirtfs | wc -l) -eq 0 ] ; then sed -i '/domount sysfs \"\" \/sys/a \/bin\/mkdir -p \/dev\/pts' %s/etc/init.d/mountvirtfs ; else echo \"\" ; fi" % (self.rep_vhosts_vm,self.rep_vhosts_vm))
       self.exec_cmd("echo \"none\t /dev/pts\t devpts\t gid=5,mode=620\t 0\t 0\" >> %s/etc/fstab" % self.rep_vhosts_vm)
 
@@ -454,7 +454,7 @@ class xen_host:
     """ Genere le nouveau fichier network (En cours)
     """
     print "preparation du fichier network interfaces"
-    if version_os[0] == "CentOS":
+    if version_os["OS"] == "CentOS":
       self.exec_cmd("cp %s/etc/sysconfig/network_scripts/ifcfg-eth0 %s/etc/sysconfig/network_scripts/ifcfg-eth0.pre.p2v" % (self.rep_vhosts_vm,self.rep_vhosts_vm))
     else:
       self.exec_cmd("cp %s/etc/network/interfaces %s/etc/network/interfaces.post.p2v" % (self.rep_vhosts_vm,self.rep_vhosts_vm))
@@ -464,11 +464,11 @@ class xen_host:
     """ copie du module 2.6.37 ou 2.6.18.149
     """
     print "copie du module necessaire"
-    if version_os[0] == "Ubuntu":
+    if version_os["OS"] == "Ubuntu":
       self.exec_cmd("cp -rpdf /lib/modules/%s %s/lib/modules/" % (self.xenmgtconf["KERNEL_UBUNTU"].split("/boot/vmlinuz-")[1],self.rep_vhosts_vm))
-    if version_os[0] == "Debian":
+    if version_os["OS"] == "Debian":
       self.exec_cmd("cp -rpdf /lib/modules/%s %s/lib/modules/" % (self.xenmgtconf["KERNEL_DEBIAN"].split("/boot/vmlinuz-")[1],self.rep_vhosts_vm))
-    if version_os[0] == "CentOS":
+    if version_os["OS"] == "CentOS":
       self.exec_cmd("cp -rpdf /lib/modules/%s %s/lib/modules/" % (self.xenmgtconf["KERNEL_CENTOS"].split("/boot/vmlinuz-")[1],self.rep_vhosts_vm))
 
   def set_ntp_sysctl(self):
@@ -508,7 +508,7 @@ class xen_host:
   def set_modprobe(self):
     """ active le modules xennet pour les interfaces reseaux
     """
-    if version_os[0] == "Debian":
+    if version_os["OS"] == "Debian":
       self.exec_cmd("echo \"alias eth0 xennet\" >> %s/etc/modprobe.d/aliases" % self.rep_vhosts_vm)
     else: 
       self.exec_cmd("echo \"alias eth0 xennet\" >> %s/etc/modprobe.d/aliases.conf" % self.rep_vhosts_vm)

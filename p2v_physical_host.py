@@ -63,11 +63,11 @@ class physical_host:
 
   def get_idev(self):
     version = self.get_version_os()
-    if version[0] == "CentOS":
+    if version["OS"] == "CentOS":
       self.idev="xvda"
-    if version[0] == "Ubuntu":
+    if version["OS"] == "Ubuntu":
       self.idev="xvda"
-    if version[0] == "Debian":
+    if version["OS"] == "Debian":
       self.idev="hda"
     return self.idev
 
@@ -185,11 +185,11 @@ class physical_host:
     liste = self.exec_cmd_ssh('cat /etc/issue')
     os_version=[]
     if liste[0].split()[0] == "CentOS":
-      os_version = [liste[0].split()[0],liste[0].split()[2]]
+      os_version = {"OS":liste[0].split()[0],"VERSION":liste[0].split()[2]}
     if liste[0].split()[0] == "Ubuntu":
-      os_version = [liste[0].split()[0],liste[0].split()[1]]
+      os_version = {"OS":liste[0].split()[0],"VERSION":liste[0].split()[1]}
     if liste[0].split()[0] == "Debian":
-      os_version = [liste[0].split()[0],liste[0].split()[2]]
+      os_version = {"OS":liste[0].split()[0],"VERSION":liste[0].split()[2]}
     return os_version
 
   def get_eligibility_check_fstab(self):
