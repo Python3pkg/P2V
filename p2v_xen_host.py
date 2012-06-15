@@ -559,3 +559,6 @@ class xen_host:
   def is_created_cfg(self,vm):
     return os.path.isfile("/etc/xen/P2V/"+ vm +"/"+ vm +".cfg")
 
+  def is_created_lv(self,vm):
+    is_lv = self.exec_cmd("ls  /dev/"+ self.vgname +"/root-"+ vm +" 2>/dev/null | wc -l")
+    return is_lv[0].strip()
