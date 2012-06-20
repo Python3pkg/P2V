@@ -4,4 +4,4 @@
 *.pyc
 *.pdf
 *.cfg
-build/*
+PKG-INFO
