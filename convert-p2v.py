@@ -13,7 +13,8 @@ def P2V_PHASE_ELIGIBILITY(PHYSICAL_NAME,VM_NAME):
   hote_xen.check_vgname()
   if PHYSICAL_NAME != VM_NAME:
     print "LE FQDN ne corresponds pas."
-  
+    sys.exit() 
+ 
   print "#### PHASE ELIGIBILITY ####"
   hote_xen.get_eligibility()
   hote_xen.rapport_eligibility()
