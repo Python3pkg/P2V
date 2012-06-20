@@ -1,4 +1,5 @@
 *.txt
+!README.txt
 *.egg
 *.tar.gz
 *.pyc
