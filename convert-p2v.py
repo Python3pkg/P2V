@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-from p2v_xen_host import xen_host
+from p2v.p2v_xen_host import xen_host
 import os,sys,shutil
 
 from optparse import OptionParser
