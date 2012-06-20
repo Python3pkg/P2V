@@ -45,7 +45,7 @@ def P2V_PHASE_2(VM):
 
 
 def analyse_commande():
-  parser = OptionParser(usage="%convert-p2v.py -f <FQDN>  [-i <IP>] | [-v <VG_NAME>] | [-s <Num_Demande_Sysadmin>] | [-e]", version="%prog 1.0")
+  parser = OptionParser(usage="%convert-p2v.py -f <FQDN>  [-i <IP>] | [-v <VG_NAME>] | [-s <Num_Demande_Sysadmin>] | [-e]", version="%prog 2.1")
   parser.add_option("-f","--fqdn", action="store", type="string", dest="vm_name",help="FDQN du serveur physique a virtualiser", metavar="FQDN" )
   parser.add_option("-i", "--ip", action="store", type="string", dest="physique_name",default="1.1.1.2",help="IP de communication entre le xen0 et le serveur physique, defaut: 1.1.1.2", metavar="IP")
   parser.add_option("-v","--vg", action="store", type="string", dest="vg_name",default="LVM_XEN",help="Nom du VG sur le serveur xen, defaut : LVM_XEN", metavar="VG")
