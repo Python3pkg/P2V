@@ -86,7 +86,7 @@ if __name__ == "__main__":
         print "POST INSTALL"
         sys.exit()
       else:
-        print "%s n est pas une VM" % VM_NAME
+        print "%s n est pas une VM, ou les fichiers /etc/xen/P2V/%s sont manquants" % (VM_NAME,VM_NAME)
         sys.exit()
     else:
       if hote_xen.is_created_cfg(VM_NAME):

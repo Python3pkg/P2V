@@ -81,10 +81,30 @@ class xen_host:
   ###               ELIGIBILITY                       ###
   #######################################################
 
+  def get_size_vg(self):
+    TOTAL = self.exec_cmd("vgs --units B | grep %s | awk '{print $6}' | sed 's/B//'" % self.vgname)[0].strip()
+    FREE = self.exec_cmd("vgs --units B | grep %s | awk '{print $7}' | sed 's/B//'" % self.vgname)[0].strip()
+    vgsize = {"TOTAL":TOTAL,"FREE":FREE}
+    return vgsize
+
+  def get_eligibility_check_vgsize(self):
+    TailleTotalPart = 0
+    self.get_partitions()
+    for i in self.tri(self.partitions[self.type_p2v]):
+      TailleTotalPart = (TailleTotalPart + int(self.partitions[self.type_p2v][i][2]))
+    VGSIZE = self.get_size_vg()
+    NEW_VGSIZE = (int(VGSIZE["FREE"]) - ( (99 * int(VGSIZE["FREE"])) / 100 ))
+    if TailleTotalPart < NEW_VGSIZE:
+      ret = 1
+    else:
+      ret = 0
+    return ret
+
   def get_eligibility(self):
     self.eligibility_check_fstab = self.P.get_eligibility_check_fstab()
     self.eligibility_check_fs_ext = self.P.get_eligibility_check_fs_ext()
     self.eligibility_check_network_file_p2v = self.P.get_eligibility_check_network_file_p2v()
+    self.eligibility_check_vgsize = self.get_eligibility_check_vgsize()
 
   def rapport_eligibility_header(self):
     RAPPORT_HEADER = "\n##########################################\n"
@@ -122,10 +142,20 @@ class xen_host:
       RAPPORT_NETWORK += "* !!! Copiez votre fichier '/etc/network/interfaces' en '/etc/network/interfaces.pre.p2v' en supprimant les vlans\n"
     RAPPORT_NETWORK += "*\n"
     print RAPPORT_NETWORK
+  
+  def rapport_eligibility_vgsize(self):
+    RAPPORT_VGSIZE = "*\n"
+    if self.eligibility_check_vgsize == 1:
+      RAPPORT_VGSIZE += "* Check taille dispo sur le VG : OK\n"
+    else:
+      RAPPORT_VGSIZE += "* Check taille dispo sur le VG : NOK\n"
+      RAPPORT_VGSIZE += "* !!! Il n y a pas assez de place sur le VG\n"
+    RAPPORT_VGSIZE += "*\n"
+    print RAPPORT_VGSIZE
 
   def rapport_eligibility_result(self):
-    somme = (self.eligibility_check_fstab + self.eligibility_check_fs_ext + self.eligibility_check_network_file_p2v)
-    if somme == 3:
+    somme = (self.eligibility_check_fstab + self.eligibility_check_fs_ext + self.eligibility_check_network_file_p2v + self.eligibility_check_vgsize)
+    if somme == 4:
       print "* le Serveur est eligible\n"
     else:
       print "* !!! Le serveur n'est pas eligible !!!\n"
@@ -134,7 +164,8 @@ class xen_host:
     self.rapport_eligibility_header()
     self.rapport_eligibility_fstab()
     self.rapport_eligibility_fs_ext()
-    self.rapport_eligibility_network() 
+    self.rapport_eligibility_network()
+    self.rapport_eligibility_vgsize() 
     self.rapport_eligibility_result()
 
   #######################################################
