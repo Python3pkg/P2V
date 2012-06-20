@@ -93,7 +93,7 @@ class xen_host:
     for i in self.tri(self.partitions[self.type_p2v]):
       TailleTotalPart = (TailleTotalPart + int(self.partitions[self.type_p2v][i][2]))
     VGSIZE = self.get_size_vg()
-    NEW_VGSIZE = (int(VGSIZE["FREE"]) - ( (99 * int(VGSIZE["FREE"])) / 100 ))
+    NEW_VGSIZE = (int(VGSIZE["FREE"]) - ( (self.xenmgtconf["VG_PERCENT_EMERGENCY"] * int(VGSIZE["FREE"])) / 100 ))
     if TailleTotalPart < NEW_VGSIZE:
       ret = 1
     else:
