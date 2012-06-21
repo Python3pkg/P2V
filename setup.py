@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import sys, os
 
-version = '2.2.5'
+version = '2.2.6'
 
 setup(name='p2v',
       version=version,
