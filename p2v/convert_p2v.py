@@ -57,7 +57,7 @@ class convert_p2v(object):
     parser.add_option("-e","--eligibility", action="store_true", dest="eligibility",help="test d eligibilite, permettant de verifier si le serveur physique est eligible pour le P2V")
     parser.add_option("-p","--postinstall", action="store_true", dest="postinstall",help="rejoue la post installation (copie des modules, modification du fstab, etc..")
     parser.set_defaults(PHY_NAME="1.1.1.2")
-    print "test"
+
     (options, args) = parser.parse_args()
     if options.vm_name == None:
       print "Option manquante\n"
