@@ -6,4 +6,4 @@
 *.pdf
 *.cfg
 *-INFO
-build/lib/p2v/__init__.py
+build/lib/p2v/*.py
