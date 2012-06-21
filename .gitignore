@@ -7,3 +7,4 @@
 *.cfg
 *-INFO
 build/lib/p2v/*.py
+.git.ori
