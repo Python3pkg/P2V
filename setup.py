@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import sys, os
 
-version = '2.1'
+version = '2.2.5'
 
 setup(name='p2v',
       version=version,
@@ -14,13 +14,15 @@ Transforme un serveur physique en serveur virtual xen""",
       author_email='arnaud.kovac@gmail.com',
       url='https://github.com/kirbs/P2V',
       license='GNU',
-      packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
+      packages=['p2v'],
+      #packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
       include_package_data=True,
       zip_safe=True,
       install_requires=[
           # -*- Extra requirements: -*-
       ],
       entry_points="""
-      # -*- Entry points: -*-
+      [console_scripts]
+      convert-p2v-xen=p2v.convert_p2v:main
       """,
       )
