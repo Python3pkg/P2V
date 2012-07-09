@@ -40,9 +40,9 @@ class convert_p2v(object):
   def P2V_PHASE_2(self):
     print "#### PHASE 2/2 ####"
     if self.hote_xen.is_livecd() == "true":
-      self.xen.import_all_variables(self.VM)
-      self.xen.exec_cmd_p2v() 
-      self.xen.post_install()
+      self.hote_xen.import_all_variables(self.VM_NAME)
+      self.hote_xen.exec_cmd_p2v() 
+      self.hote_xen.post_install()
     else:
       print "Erreur !!! Il faut que le LiceCD Slax soit present"
       sys.exit()
