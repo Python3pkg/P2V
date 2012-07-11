@@ -302,7 +302,7 @@ class xen_host:
       if self.version_os["VERSION"] == "3.1":
         conf += "'mac=%s , bridge=xenbr2003'" % self.interfaces[i]
       else:
-        conf += "'bridge=xenbr2003'"
+        conf += "'bridge=xenbr%s'" % self.vlan
       if cpt != int(count):
         conf += ","
       cpt = (int(cpt) + 1)
