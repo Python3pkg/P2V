@@ -26,6 +26,7 @@ class convert_p2v(object):
   
   def P2V_PHASE_1(self):
     self.hote_xen.check_vgname()
+    self.hote_xen.get_vlan()
     if self.PHYSICAL_NAME != self.VM_NAME:
       print "LE FQDN ne corresponds pas."
       sys.exit()
@@ -49,9 +50,10 @@ class convert_p2v(object):
 
 
   def analyse_commande(self):
-    parser = OptionParser(usage="%convert-p2v-xen -f <FQDN>  [-i <IP>] | [-v <VG_NAME>] | [-s <Num_Demande_Sysadmin>] | [-e]", version="%prog 2.2.8")
+    parser = OptionParser(usage="%convert-p2v-xen -f <FQDN>  [-i <IP>] [-l <VLAN> ] | [-v <VG_NAME>] | [-s <Num_Demande_Sysadmin>] | [-e]", version="%prog 2.2.8")
     parser.add_option("-f","--fqdn", action="store", type="string", dest="vm_name",help="FDQN du serveur physique a virtualiser", metavar="FQDN" )
-    parser.add_option("-i", "--ip", action="store", type="string", dest="physique_name",default="1.1.1.2",help="IP de communication entre le xen0 et le serveur physique, defaut: 1.1.1.2", metavar="IP")
+    parser.add_option("-i", "--ip", action="store", type="string", dest="physique_name",help="IP de communication entre le xen0 et le serveur physique", metavar="IP")
+    parser.add_option("-l", "--vlan", action="store", type="string", dest="vlan",help="Numero de VLAN", metavar="VLAN")
     parser.add_option("-v","--vg", action="store", type="string", dest="vg_name",default="LVM_XEN",help="Nom du VG sur le serveur xen, defaut : LVM_XEN", metavar="VG")
     parser.add_option("-s","--sysadmin", action="store", type="string", dest="dem_sysadmin",default="",help="Numero de demande sysadmin", metavar="Num DS")
     parser.add_option("-e","--eligibility", action="store_true", dest="eligibility",help="test d eligibilite, permettant de verifier si le serveur physique est eligible pour le P2V")
@@ -59,7 +61,7 @@ class convert_p2v(object):
     parser.set_defaults(PHY_NAME="1.1.1.2")
 
     (options, args) = parser.parse_args()
-    if options.vm_name == None:
+    if options.vm_name == None or options.vlan == None or options.physique_name == None:
       print "Option manquante\n"
       os.system("convert-p2v-xen --help")
       sys.exit()
@@ -76,6 +78,7 @@ def main():
   H.VM_NAME = options.vm_name
   H.DS_SYSADMIN = options.dem_sysadmin
   H.VG_NAME = options.vg_name
+  H.VLAN = options.vlan
 
   H.hote_xen = xen_host(ip_srv_phy=H.PHY_IP,ds=H.DS_SYSADMIN,vg_name=H.VG_NAME)
 

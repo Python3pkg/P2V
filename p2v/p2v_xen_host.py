@@ -445,6 +445,7 @@ class xen_host:
     export_variable += "type_p2v=\"%s\"\n" % self.type_p2v
     export_variable += "name_vm_dest=\"%s\"\n" % self.name_vm_dest
     export_variable += "version_os=%s\n" % self.version_os
+    export_variable += "vlan=%s\n" % self.vlan
     return export_variable
 
   def import_all_variables(self,VM):
@@ -593,3 +594,6 @@ class xen_host:
   def is_created_lv(self,vm):
     is_lv = self.exec_cmd("ls  /dev/"+ self.vgname +"/root-"+ vm +" 2>/dev/null | wc -l")
     return is_lv[0].strip()
+
+  def get_vlan(self):
+    
