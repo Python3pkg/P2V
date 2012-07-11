@@ -10,7 +10,7 @@ from sshtools import Ssh
 
 class xen_host:
  
-  def __init__(self,ip_srv_phy="",xenmgtconf="",ds="",vg_name=""):
+  def __init__(self,ip_srv_phy="",xenmgtconf="",ds="",vg_name="",vlan=""):
     xenmgtconf={}
     execfile("/etc/xen/xenmgt-p2v.conf",xenmgtconf)
     self.xenmgtconf = xenmgtconf
@@ -22,6 +22,7 @@ class xen_host:
     self.type_vm="P2V"
     self.sysadmin = ds
     self.vgname = vg_name
+    self.vlan = vlan
 
   def exec_cmd(self,cmd=''):
     CMD = os.popen(cmd,"r")
@@ -550,6 +551,12 @@ class xen_host:
     date_generate_p2v = time.strftime("%d/%m/%y %H:%M", time.localtime())
     self.exec_cmd("echo \"### P2V genere a %s \" >> /etc/xen/vm/%s" % (date_generate_p2v,name_vm_dest))
 
+  def auto_vm(self):
+    self.exec_cmd("cd /etc/xen/auto ; ln -s /etc/xen/vm/"+ name_vm_dest +"")
+
+  def finish_p2v(self):
+    self.exec_cmd("touch /etc/xen/P2V/"+ name_vm_dest +"/"+ name_vm_dest +".finish")
+
   def post_install(self):
     self.copy_conf_to_xen()
     self.mkdir_rep_vhosts_vm()
@@ -563,6 +570,7 @@ class xen_host:
     self.modif_devpts()
     self.umount_root_vm()
     self.auto_vm()
+    self.finish_p2v()
 
     
   ############################
@@ -582,9 +590,6 @@ class xen_host:
     size_total=()
     size_dispo=()
 
-  def auto_vm(self):
-    self.exec_cmd("cd /etc/xen/auto ; ln -s /etc/xen/vm/"+ name_vm_dest +"")
-
   def exec_cmd_p2v(self):
     os.system("/bin/bash /etc/xen/P2V/"+ name_vm_dest +"/"+ name_vm_dest +".sh")
 
@@ -595,5 +600,9 @@ class xen_host:
     is_lv = self.exec_cmd("ls  /dev/"+ self.vgname +"/root-"+ vm +" 2>/dev/null | wc -l")
     return is_lv[0].strip()
 
-  def get_vlan(self):
-    
+  def is_finish_p2v(self,vm):
+    self.import_all_variables(vm)
+    if os.path.isfile("/etc/xen/P2V/"+ vm +"/"+ vm +".finish"):
+      return "true"
+    else: 
+      return "false"

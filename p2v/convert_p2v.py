@@ -26,7 +26,6 @@ class convert_p2v(object):
   
   def P2V_PHASE_1(self):
     self.hote_xen.check_vgname()
-    self.hote_xen.get_vlan()
     if self.PHYSICAL_NAME != self.VM_NAME:
       print "LE FQDN ne corresponds pas."
       sys.exit()
@@ -80,7 +79,7 @@ def main():
   H.VG_NAME = options.vg_name
   H.VLAN = options.vlan
 
-  H.hote_xen = xen_host(ip_srv_phy=H.PHY_IP,ds=H.DS_SYSADMIN,vg_name=H.VG_NAME)
+  H.hote_xen = xen_host(ip_srv_phy=H.PHY_IP,ds=H.DS_SYSADMIN,vg_name=H.VG_NAME,vlan=H.VLAN)
 
   H.PHYSICAL_NAME = H.hote_xen.get_name_vm_dest()
   print H.PHYSICAL_NAME
@@ -98,7 +97,11 @@ def main():
         sys.exit()
     else:
       if H.hote_xen.is_created_cfg(H.VM_NAME):
-        H.P2V_PHASE_2()
+        if H.hote_xen.is_finish_p2v(H.VM_NAME) == "false":
+          H.P2V_PHASE_2()
+        else:
+          print "Le P2V a deja ete effectue"
+          sys.exit()
       else:
         H.P2V_PHASE_1()
 
