@@ -1,3 +1,16 @@
+<<<<<<< HEAD
 *.class
 *.pyc
 *.pyo
+=======
+*.txt
+!README.txt
+*.egg
+*.tar.gz
+*.pyc
+*.pdf
+*.cfg
+*-INFO
+build/lib/p2v/*.py
+.git.ori
+>>>>>>> 4bae69f06e86dd3464a35e7c87a64750504eb7fa

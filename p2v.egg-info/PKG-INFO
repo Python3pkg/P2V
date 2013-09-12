@@ -1,0 +1,11 @@
+Metadata-Version: 1.0
+Name: p2v
+Version: 2.2.8
+Summary: Physical To Virtual
+Home-page: https://github.com/kirbs/P2V
+Author: KOVAC Arnaud
+Author-email: arnaud.kovac@gmail.com
+License: GNU
+Description: Transforme un serveur physique en serveur virtual xen
+Keywords: p2v xen
+Platform: UNKNOWN

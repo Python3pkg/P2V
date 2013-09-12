@@ -1,7 +1,7 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
 
-import os,re, math
+
+import os,re
 from sshtools import Ssh
 
 
@@ -30,10 +30,8 @@ class physical_host:
   
   def get_memory1(self):
     liste = self.exec_cmd_ssh('free -m | grep -i Mem ')
-    memory = float(liste[0].split()[1])
-    memory_ceil = math.ceil(memory / 1024)
-    memory = "%d" % (round(memory_ceil,0) * 1024)
-    return memory
+    memory_swap = liste[0].split()[1]
+    return memory_swap
 
   def get_mac_addr(self,interface):
     cmd = "ifconfig %s | grep HWaddr" % interface
@@ -57,16 +55,11 @@ class physical_host:
     return nb_cpu
 
   def is_livecd(self):
-    #liste = self.exec_cmd_ssh('cat /etc/issue | grep -i slax | wc -l')
-    liste = self.exec_cmd_ssh('hostname | grep -i sysresccd | wc -l')
+    liste = self.exec_cmd_ssh('cat /etc/issue | grep -i slax | wc -l')
     if int(liste[0].strip()) >= 1:
-	    return "True"
+	  return "true"
     else:
-      liste = self.exec_cmd_ssh('cat /etc/issue | grep -i slax | wc -l')
-      if int(liste[0].strip()) >= 1:
-        return "True"
-      else:
-	     return "False"
+	  return "false"
 
   def get_idev(self):
     version = self.get_version_os()
@@ -104,13 +97,11 @@ class physical_host:
       fs = i.split()[2].strip()
       nom_part = i.split()[1].strip()
       taille = self.taille_part(nom_device,fs)
-      UUID = ""
-      if fs != "swap":
-        UUID = self.GetUuidByDisk(nom_device)
+      if fs != "swap": 
         if cpt == 4:
           cpt=5
         nom_device_para="%s%s" % (self.idev,cpt)
-        PARTITIONS[nom_device_para] = {"DEVICE":nom_device,"FS":fs,"SIZE":taille,"PARTITION":nom_part,"UUID":UUID}
+        PARTITIONS[nom_device_para] = (nom_device,fs,taille,nom_part)
         cpt=(cpt + 1)
     for i in liste:
       nom_device = i.split()[0].strip()
@@ -118,25 +109,8 @@ class physical_host:
       if fs == "swap":
         nom_device_para="%s%s" % (self.idev,cpt)
         taille_swap = self.get_memory_swap()
-        PARTITIONS[nom_device_para] = {"DEVICE":nom_device,"FS":fs,"SIZE":taille_swap,"PARTITION":nom_part}
+        PARTITIONS[nom_device_para] = (nom_device,fs,taille_swap,nom_part)
     return PARTITIONS
-
-  def get_partitions_hvm(self):
-    self.get_fstab_without_uuid()
-    #self.detect_lvm()
-    cpt='`'
-    #liste = self.exec_cmd_ssh('LANG=POSIX fdisk -l /dev/cciss/c0d0 2> /dev/null | grep "^Disk /dev" | grep -v "mapper" | sed "s/Disk//" | sed "s#/dev/##"')
-    #liste = self.exec_cmd_ssh('LANG=POSIX fdisk -l /dev/sda 2> /dev/null | grep "^Disk /dev" | grep -v "mapper" | sed "s/Disk//" | sed "s#/dev/##"')
-    liste = self.exec_cmd_ssh('LANG=POSIX fdisk -l 2> /dev/null | grep "^Disk /dev" | grep -v "mapper" | sed "s/Disk//" | sed "s#/dev/##"')
-    PARTITION={}
-    for i in liste:
-      nom_part = i.split(":")[0].strip()
-      nom_part_hvm = "hd%s" % chr(ord(cpt) + 1)
-      taille = i.split(",")[1].split()[0]
-      PARTITION[nom_part] = {"DEVICE":nom_part_hvm, "SIZE":taille}
-    return PARTITION
-    # {'cciss/c0d0': ('hda', '120034123776'),'cciss/c0d1': ('hdb', '120034123776')}
-
 
   def taille_part(self,partition,filesystem):
     if (filesystem == "ext2") or (filesystem == "ext3") or (filesystem == "ext4"):
@@ -177,20 +151,11 @@ class physical_host:
     """ converti Ko, Mo, Go  et To en octets """
     
 
-  def GetUuidByDisk(self,partition):
-    version = self.get_version_os()    
-    if version["VERSION"] == "3.1":
-      UUID = ""
-    else:
-      UuidByDisk = self.exec_cmd_ssh('tune2fs -l '+ partition +' | grep "Filesystem UUID"')
-      UUID = UuidByDisk[0].split(":")[1].strip()
-    return UUID
 
 
   def get_all_partitions(self):
     ALL_PARTITIONS={}
     ALL_PARTITIONS["PARA"] = (self.get_partitions_para())
-    ALL_PARTITIONS["HVM"] = (self.get_partitions_hvm())
     return ALL_PARTITIONS
 
   def detect_lvm(self):
@@ -237,7 +202,7 @@ class physical_host:
     return ret
 
   def get_eligibility_check_fs_ext(self):
-    CHECK_FS_EXT = self.exec_cmd_ssh('df -PlT | egrep -v "Type|rootfs|none|udev|tmpfs|ext[234]" | wc -l')
+    CHECK_FS_EXT = self.exec_cmd_ssh('df -x tmpfs -x swap -x proc -x sys -x ext2 -x ext3 -x ext4 2>/dev/null | wc -l')
     CHECK_FS_EXT = CHECK_FS_EXT[0].strip()
     if CHECK_FS_EXT == "0":
       ret = 1
@@ -245,12 +210,12 @@ class physical_host:
       ret = 0
     return ret
 
-  #def get_eligibility_check_network_file_p2v(self):
-  #  CHECK_NETWORK_FILE_P2V = self.exec_cmd_ssh('ls /etc/network/interfaces.pre.p2v 2>/dev/null | wc -l')
-  #  CHECK_NETWORK_FILE_P2V = CHECK_NETWORK_FILE_P2V[0].strip()
-  #  if CHECK_NETWORK_FILE_P2V == "1":
-  #    ret = 1
-  #  else:
-  #    ret = 0
-  #  return ret
+  def get_eligibility_check_network_file_p2v(self):
+    CHECK_NETWORK_FILE_P2V = self.exec_cmd_ssh('ls /etc/network/interfaces.pre.p2v 2>/dev/null | wc -l')
+    CHECK_NETWORK_FILE_P2V = CHECK_NETWORK_FILE_P2V[0].strip()
+    if CHECK_NETWORK_FILE_P2V == "1":
+      ret = 1
+    else:
+      ret = 0
+    return ret
     
