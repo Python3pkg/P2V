@@ -14,7 +14,7 @@ class Ssh:
      os.popen("ssh-keygen -R %s 2>/dev/null" % srv,"r")
 
   def copy_id(self):
-     print "### Copie des clefs : ###\n"
+     print("### Copie des clefs : ###\n")
      os.popen("ssh-copy-id -i /etc/xen/P2V/ssh/p2v.key.pub %s 2>/dev/null" % self.server,"r")
 
   def copy_id_client(self, srv):

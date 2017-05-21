@@ -4,10 +4,10 @@
 import os, sys, re, time
 from operator import itemgetter
 import shutil
-from p2v_physical_host import physical_host
-from GenConfNetwork import GenConfNetwork
-from pxe_server import pxe
-from sshtools import Ssh
+from .p2v_physical_host import physical_host
+from .GenConfNetwork import GenConfNetwork
+from .pxe_server import pxe
+from .sshtools import Ssh
 from random import choice
 
 
@@ -34,8 +34,8 @@ class xen_host:
   def __init__(self, confp2v="/etc/xen/xenmgt-p2v.conf"):
     xenmgtconf = {}
     template_hvm={}
-    execfile(confp2v, xenmgtconf)
-    execfile(xenmgtconf["TEMPLATE_HVM"],template_hvm)
+    exec(compile(open(confp2v).read(), confp2v, 'exec'), xenmgtconf)
+    exec(compile(open(xenmgtconf["TEMPLATE_HVM"]).read(), xenmgtconf["TEMPLATE_HVM"], 'exec'),template_hvm)
     self.xenmgtconf = xenmgtconf
     self.template_hvm = template_hvm
     self.bs = self.xenmgtconf["DD_BS"]
@@ -56,7 +56,7 @@ class xen_host:
     if vg == "1":
       return self.vgname
     else:
-      print "!!!ERROR !!! Le VG %s n'existe pas, utiliser l'option --vg=<VG_NAME> par défaut c'est LVM_XEN" % self.vgname
+      print("!!!ERROR !!! Le VG %s n'existe pas, utiliser l'option --vg=<VG_NAME> par défaut c'est LVM_XEN" % self.vgname)
       sys.exit()
 
   def get_name_vm_dest(self):
@@ -67,7 +67,7 @@ class xen_host:
     self.ssh.del_keyfile_client(self.ip_physique)
     
     if self.no_pxe == True:
-      print "no_pxe : %s" % self.no_pxe
+      print("no_pxe : %s" % self.no_pxe)
       self.ssh.copy_id_client(self.ip_physique)
     
     name_vm_dest = self.ssh.exec_cmd("hostname")
@@ -75,16 +75,16 @@ class xen_host:
       self.name_vm_dest = name_vm_dest[0].strip()
     except:
       if self.no_pxe == True:
-        print ""
-        print "!!! ATTENTION L'OPTION 'SERVEUR PXE' A ETE DESACTIVE AFIN DE PASSER PAR UN LIVECD DANS LE CEDEROM !!!"
-        print ""
-        print "Assurez vous que : "
-        print "   - Le port du switch soit bien UnTaggé avec le vlan %s" % self.vlan
-        print "   - Votre LiveCD soit bien inséré et configuré avec l'ip correspondante :"
-        print "       # ip addr add %s/24 dev eth0" % self.ip_physique
-        print "   - Le paquet 'dcfldd' soit installé sur le livecd"
+        print("")
+        print("!!! ATTENTION L'OPTION 'SERVEUR PXE' A ETE DESACTIVE AFIN DE PASSER PAR UN LIVECD DANS LE CEDEROM !!!")
+        print("")
+        print("Assurez vous que : ")
+        print("   - Le port du switch soit bien UnTaggé avec le vlan %s" % self.vlan)
+        print("   - Votre LiveCD soit bien inséré et configuré avec l'ip correspondante :")
+        print("       # ip addr add %s/24 dev eth0" % self.ip_physique)
+        print("   - Le paquet 'dcfldd' soit installé sur le livecd")
       else:
-        print "connexion impossible avec le serveur physique, le CFp2v est bien descendu sur le serveur physique ?"
+        print("connexion impossible avec le serveur physique, le CFp2v est bien descendu sur le serveur physique ?")
       sys.exit()
     self.new_name_vm_ip = self.ip_physique
     return self.name_vm_dest
@@ -121,10 +121,10 @@ class xen_host:
     ConfCFengine = {}
     ConfCFengine["MAC_ADDR"] = ""
     try:
-      execfile("/etc/xen/P2V/conf/%s/%s/config" % (self.projet_p2v, self.vmnamecfengine), ConfCFengine)
+      exec(compile(open("/etc/xen/P2V/conf/%s/%s/config" % (self.projet_p2v, self.vmnamecfengine)).read(), "/etc/xen/P2V/conf/%s/%s/config" % (self.projet_p2v, self.vmnamecfengine), 'exec'), ConfCFengine)
       self.ConfCFengine = ConfCFengine
     except:
-      print "Le produit CFp2V n'est pas descendu correctement ou %s n'a pas été ajouté au CFp2v" % self.vmnamecfengine
+      print("Le produit CFp2V n'est pas descendu correctement ou %s n'a pas été ajouté au CFp2v" % self.vmnamecfengine)
       sys.exit()
     ConfCFp2v = {}
     #ConfCFp2v[self.vmnamecfengine] = {"VLAN":ConfCFengine["ID_VLAN"], "IP_PXE":ConfCFengine["IP_PXE"], "IP_VM":ConfCFengine["IP_VM"], "IP_XEN":ConfCFengine["IP_XEN"]}
@@ -194,7 +194,7 @@ class xen_host:
     RAPPORT_HEADER = "\n##########################################\n"
     RAPPORT_HEADER += "######## RAPPORT D'ELIGIBILITE ###########\n"
     RAPPORT_HEADER += "##########################################"
-    print RAPPORT_HEADER
+    print(RAPPORT_HEADER)
 
   def rapport_eligibility_fstab(self):
     RAPPORT_FSTAB = "\n*\n"
@@ -205,7 +205,7 @@ class xen_host:
       RAPPORT_FSTAB += "* !!! Le fichier /etc/fstab contient un ou plusieurs LABEL\n"
       RAPPORT_FSTAB += "* Veuillez remplacer les entrées LABEL par les devices correspondant\n"
     RAPPORT_FSTAB += "*\n"
-    print RAPPORT_FSTAB
+    print(RAPPORT_FSTAB)
 
   def rapport_eligibility_fs_ext(self):
     RAPPORT_FSEXT = "*\n"
@@ -215,7 +215,7 @@ class xen_host:
       RAPPORT_FSEXT += "* Check FileSystem : NOK\n"
       RAPPORT_FSEXT += "* !!! Une ou plusieurs partitions contiennent un FileSystem different de ext2,3,4\n"
     RAPPORT_FSEXT += "*\n"
-    print RAPPORT_FSEXT
+    print(RAPPORT_FSEXT)
 
   #def rapport_eligibility_network(self):
   #  RAPPORT_NETWORK = "*\n"
@@ -235,16 +235,16 @@ class xen_host:
       RAPPORT_VGSIZE += "* Check taille dispo sur le VG : NOK\n"
       RAPPORT_VGSIZE += "* !!! Il n y a pas assez de place sur le VG\n"
     RAPPORT_VGSIZE += "*\n"
-    print RAPPORT_VGSIZE
+    print(RAPPORT_VGSIZE)
 
   def rapport_eligibility_result(self):
     #somme = (self.eligibility_check_fstab + self.eligibility_check_fs_ext + self.eligibility_check_network_file_p2v + self.eligibility_check_vgsize)
     somme = (self.eligibility_check_fstab + self.eligibility_check_fs_ext + self.eligibility_check_vgsize)
     #if somme == 4:
     if somme == 3:
-      print "* le Serveur est éligible\n"
+      print("* le Serveur est éligible\n")
     else:
-      print "* !!! Le serveur n'est pas éligible !!!\n"
+      print("* !!! Le serveur n'est pas éligible !!!\n")
 
   def rapport_eligibility(self):
     self.rapport_eligibility_header()
@@ -380,7 +380,7 @@ class xen_host:
 
   def ecrit_conf_partitions(self):
     conf = "["
-    count = len(self.partitions[self.type_p2v].keys())
+    count = len(list(self.partitions[self.type_p2v].keys()))
     cpt = 1
     for i in self.tri(self.partitions[self.type_p2v]):
       if self.type_p2v == "HVM":
@@ -406,9 +406,9 @@ class xen_host:
   def generate_conf_xen_hvm(self):
     self.ecrit_conf_partitions()
     CONF_HVM = ""
-    for i in self.template_hvm.keys():
+    for i in list(self.template_hvm.keys()):
       if i != "__builtins__":
-        print i
+        print(i)
         if i == "vif":
           CONF_HVM += ""+str(i)+" = "+ self.ecrit_conf_interfaces() +"\n"
         elif i == "disk":
@@ -427,7 +427,7 @@ class xen_host:
 
   def ecrit_conf_interfaces(self):
     conf = "["
-    count = len(self.interfaces.keys())
+    count = len(list(self.interfaces.keys()))
     cpt = 1
     for i in self.tri(self.interfaces):
       if self.type_p2v == "HVM":
@@ -596,9 +596,9 @@ class xen_host:
 
   def import_all_variables(self, VM):
     new_val = {}
-    execfile("/etc/xen/P2V/" + VM + "/" + VM + ".var", new_val)
+    exec(compile(open("/etc/xen/P2V/" + VM + "/" + VM + ".var").read(), "/etc/xen/P2V/" + VM + "/" + VM + ".var", 'exec'), new_val)
     self.new_variables = new_val
-    for i in self.new_variables.keys():
+    for i in list(self.new_variables.keys()):
       if i != "__builtins__":
         globals()[i] = self.new_variables[i]
     self.mac_addr = globals()["mac_addr"]
@@ -607,14 +607,14 @@ class xen_host:
   def mkdir_rep_vhosts_vm(self):
     """ Creation du repertoire /vhosts/vm
     """
-    print "Creation du repertoire /vhosts/%s" % name_vm_dest
+    print("Creation du repertoire /vhosts/%s" % name_vm_dest)
     self.rep_vhosts_vm = "/vhosts/" + name_vm_dest + ""
     self.exec_cmd("mkdir -p %s" % self.rep_vhosts_vm)
 
   def modif_fstab(self):
     """ Genere le nouveau fichier fstab
     """
-    print "preparation du fichier fstab"
+    print("preparation du fichier fstab")
     self.exec_cmd("cp %s/etc/fstab %s/etc/fstab.pre.p2v" % (self.rep_vhosts_vm, self.rep_vhosts_vm))
     self.exec_cmd("cp %s/etc/fstab_without_uuid %s/etc/fstab" % (self.rep_vhosts_vm, self.rep_vhosts_vm))
     line = open("/vhosts/" + name_vm_dest + "/etc/fstab_without_uuid", "r").read()
@@ -632,7 +632,7 @@ class xen_host:
   def modif_network(self):
     """ Genere le nouveau fichier network (En cours)
     """
-    print "preparation du fichier network interfaces"
+    print("preparation du fichier network interfaces")
     if version_os["OS"] == "CentOS":
       self.exec_cmd("cp %s/etc/sysconfig/network_scripts/ifcfg-eth0 %s/etc/sysconfig/network_scripts/ifcfg-eth0.pre.p2v" % (self.rep_vhosts_vm, self.rep_vhosts_vm))
     else:
@@ -645,7 +645,7 @@ class xen_host:
   def copie_modules(self):
     """ copie du module 2.6.37 ou 2.6.18.149
     """
-    print "copie du module necessaire"
+    print("copie du module necessaire")
     if version_os["OS"] == "Ubuntu":
       self.exec_cmd("cp -rpdf /lib/modules/%s %s/lib/modules/" % (self.xenmgtconf["KERNEL_UBUNTU"].split("/boot/vmlinuz-")[1], self.rep_vhosts_vm))
     if version_os["OS"] == "Debian":
@@ -656,13 +656,13 @@ class xen_host:
   def set_ntp_sysctl(self):
     """ Modifie le sysctl pour la correction du ntp
     """
-    print "Modification du sysctl"
+    print("Modification du sysctl")
     self.exec_cmd("echo \"xen.independent_wallclock = 1\" >> %s/etc/sysctl.conf" % self.rep_vhosts_vm)
  
   def mount_root_vm(self):
     """ Monte la partition root de la VM afin d'effectuer la post_install
     """
-    print "montage de la partition root de %s" % name_vm_dest
+    print("montage de la partition root de %s" % name_vm_dest)
     if type_p2v == "PARA":
       device_racine = "root"
       self.exec_cmd("mount /dev/%s/%s-%s %s" % (vgname, device_racine, name_vm_dest, self.rep_vhosts_vm))
@@ -672,13 +672,13 @@ class xen_host:
   def umount_root_vm(self):
     """ Monte la partition root de la VM afin d'effectuer la post_install
     """
-    print "demontage de la partition root de %s" % name_vm_dest
+    print("demontage de la partition root de %s" % name_vm_dest)
     self.exec_cmd("umount %s" % self.rep_vhosts_vm)
 
   def set_console_xen(self):
     """ Configuration de la console xen pour la VM
     """
-    print ""
+    print("")
     self.exec_cmd("echo \"xvc0\" >> %s/etc/securetty" % self.rep_vhosts_vm) 
     if os.path.isfile("%s/etc/inittab" % self.rep_vhosts_vm):
       self.exec_cmd("echo \"7:2345:respawn:/sbin/getty 38400 xvc0\" >> %s/etc/inittab" % self.rep_vhosts_vm) 
@@ -757,12 +757,12 @@ class xen_host:
   def tri(self, dico):
     """ Permet de tirer un dictionnaire
     """
-    return sorted(dico.keys(), key=str) 
+    return sorted(list(dico.keys()), key=str) 
 
   def tri_inverse(self, dico):
     """ Permet de tirer un dictionnaire
     """
-    return sorted(dico.keys(), key=str, reverse=True) 
+    return sorted(list(dico.keys()), key=str, reverse=True) 
 
   def copy_dd_bs(self, bs=''):
     self.bs = bs
@@ -789,7 +789,7 @@ class xen_host:
           if CheckDevice == "0":
             New_dev = "/dev/sda"
             pass
-    if New_dev <> "0":
+    if New_dev != "0":
       fic_exec = "/etc/xen/P2V/%s/%s.sh" % (name_vm_dest,name_vm_dest)
       result = file(fic_exec,"r").read().replace("/dev/cciss/c0d0p","/dev/sda")
       file(fic_exec,"w").write(result)

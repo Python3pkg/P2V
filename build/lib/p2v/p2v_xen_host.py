@@ -12,7 +12,7 @@ class xen_host:
  
   def __init__(self,ip_srv_phy="",xenmgtconf="",ds="",vg_name=""):
     xenmgtconf={}
-    execfile("/etc/xen/xenmgt-p2v.conf",xenmgtconf)
+    exec(compile(open("/etc/xen/xenmgt-p2v.conf").read(), "/etc/xen/xenmgt-p2v.conf", 'exec'),xenmgtconf)
     self.xenmgtconf = xenmgtconf
     self.bs=self.xenmgtconf["DD_BS"]
     self.P = physical_host(ip_srv_phy)
@@ -38,7 +38,7 @@ class xen_host:
     if vg == "1":
       return self.vgname
     else:
-      print "!!!ERROR !!! Le VG %s n'existe pas, utiliser l'option --vg=<VG_NAME> par defaut c'est LVM_XEN" % self.vgname
+      print("!!!ERROR !!! Le VG %s n'existe pas, utiliser l'option --vg=<VG_NAME> par defaut c'est LVM_XEN" % self.vgname)
       sys.exit()
 
   def get_name_vm_dest(self):
@@ -110,7 +110,7 @@ class xen_host:
     RAPPORT_HEADER = "\n##########################################\n"
     RAPPORT_HEADER += "######## RAPPORT D'ELIGIBILITE ###########\n"
     RAPPORT_HEADER += "##########################################"
-    print RAPPORT_HEADER
+    print(RAPPORT_HEADER)
 
   def rapport_eligibility_fstab(self):
     RAPPORT_FSTAB = "\n*\n"
@@ -121,7 +121,7 @@ class xen_host:
       RAPPORT_FSTAB += "* !!! Le fichier /etc/fstab contient un ou plusieurs LABEL\n"
       RAPPORT_FSTAB += "* Veuillez remplacer les entrees LABEL par les devices correspondant\n"
     RAPPORT_FSTAB += "*\n"
-    print RAPPORT_FSTAB
+    print(RAPPORT_FSTAB)
 
   def rapport_eligibility_fs_ext(self):
     RAPPORT_FSEXT = "*\n"
@@ -131,7 +131,7 @@ class xen_host:
       RAPPORT_FSEXT += "* Check FileSystem : NOK\n"
       RAPPORT_FSEXT += "* !!! Une ou plusieurs partitions contienent un FileSystem different de ext2,3,4\n"
     RAPPORT_FSEXT += "*\n"
-    print RAPPORT_FSEXT
+    print(RAPPORT_FSEXT)
 
   def rapport_eligibility_network(self):
     RAPPORT_NETWORK = "*\n"
@@ -141,7 +141,7 @@ class xen_host:
       RAPPORT_NETWORK += "* Check Network : NOK\n"
       RAPPORT_NETWORK += "* !!! Copiez votre fichier '/etc/network/interfaces' en '/etc/network/interfaces.pre.p2v' en supprimant les vlans\n"
     RAPPORT_NETWORK += "*\n"
-    print RAPPORT_NETWORK
+    print(RAPPORT_NETWORK)
   
   def rapport_eligibility_vgsize(self):
     RAPPORT_VGSIZE = "*\n"
@@ -151,14 +151,14 @@ class xen_host:
       RAPPORT_VGSIZE += "* Check taille dispo sur le VG : NOK\n"
       RAPPORT_VGSIZE += "* !!! Il n y a pas assez de place sur le VG\n"
     RAPPORT_VGSIZE += "*\n"
-    print RAPPORT_VGSIZE
+    print(RAPPORT_VGSIZE)
 
   def rapport_eligibility_result(self):
     somme = (self.eligibility_check_fstab + self.eligibility_check_fs_ext + self.eligibility_check_network_file_p2v + self.eligibility_check_vgsize)
     if somme == 4:
-      print "* le Serveur est eligible\n"
+      print("* le Serveur est eligible\n")
     else:
-      print "* !!! Le serveur n'est pas eligible !!!\n"
+      print("* !!! Le serveur n'est pas eligible !!!\n")
 
   def rapport_eligibility(self):
     self.rapport_eligibility_header()
@@ -277,7 +277,7 @@ class xen_host:
 
   def ecrit_conf_partitions(self):
     conf="["
-    count = len(self.partitions[self.type_p2v].keys())
+    count = len(list(self.partitions[self.type_p2v].keys()))
     cpt=1
     for i in self.tri(self.partitions[self.type_p2v]):
       if self.partitions[self.type_p2v][i][3] == "/":
@@ -295,7 +295,7 @@ class xen_host:
 
   def ecrit_conf_interfaces(self):
     conf="["
-    count = len(self.interfaces.keys())
+    count = len(list(self.interfaces.keys()))
     cpt=1
     for i in self.tri(self.interfaces):
       if self.version_os["VERSION"] == "3.1":
@@ -449,9 +449,9 @@ class xen_host:
 
   def import_all_variables(self,VM):
     new_val={}
-    execfile("/etc/xen/P2V/"+ VM +"/"+ VM +".var",new_val)
+    exec(compile(open("/etc/xen/P2V/"+ VM +"/"+ VM +".var").read(), "/etc/xen/P2V/"+ VM +"/"+ VM +".var", 'exec'),new_val)
     self.new_variables=new_val
-    for i in self.new_variables.keys():
+    for i in list(self.new_variables.keys()):
       if i != "__builtins__":
         globals()[i] = self.new_variables[i]
      
@@ -459,14 +459,14 @@ class xen_host:
   def mkdir_rep_vhosts_vm(self):
     """ Creation du repertoire /vhosts/vm
     """
-    print "Creation du repertoire /vhosts/%s" % name_vm_dest
+    print("Creation du repertoire /vhosts/%s" % name_vm_dest)
     self.rep_vhosts_vm = "/vhosts/"+ name_vm_dest +""
     self.exec_cmd("mkdir -p %s" % self.rep_vhosts_vm)
 
   def modif_fstab(self):
     """ Genere le nouveau fichier fstab
     """
-    print "preparation du fichier fstab"
+    print("preparation du fichier fstab")
     self.exec_cmd("cp %s/etc/fstab %s/etc/fstab.pre.p2v" % (self.rep_vhosts_vm,self.rep_vhosts_vm))
     self.exec_cmd("cp %s/etc/fstab_without_uuid %s/etc/fstab" % (self.rep_vhosts_vm,self.rep_vhosts_vm))
     line = open("/vhosts/"+ name_vm_dest +"/etc/fstab_without_uuid","r").read()
@@ -484,7 +484,7 @@ class xen_host:
   def modif_network(self):
     """ Genere le nouveau fichier network (En cours)
     """
-    print "preparation du fichier network interfaces"
+    print("preparation du fichier network interfaces")
     if version_os["OS"] == "CentOS":
       self.exec_cmd("cp %s/etc/sysconfig/network_scripts/ifcfg-eth0 %s/etc/sysconfig/network_scripts/ifcfg-eth0.pre.p2v" % (self.rep_vhosts_vm,self.rep_vhosts_vm))
     else:
@@ -494,7 +494,7 @@ class xen_host:
   def copie_modules(self):
     """ copie du module 2.6.37 ou 2.6.18.149
     """
-    print "copie du module necessaire"
+    print("copie du module necessaire")
     if version_os["OS"] == "Ubuntu":
       self.exec_cmd("cp -rpdf /lib/modules/%s %s/lib/modules/" % (self.xenmgtconf["KERNEL_UBUNTU"].split("/boot/vmlinuz-")[1],self.rep_vhosts_vm))
     if version_os["OS"] == "Debian":
@@ -505,25 +505,25 @@ class xen_host:
   def set_ntp_sysctl(self):
     """ Modifie le sysctl pour la correction du ntp
     """
-    print "Modification du sysctl"
+    print("Modification du sysctl")
     self.exec_cmd("echo \"xen.independent_wallclock = 1\" >> %s/etc/sysctl.conf" % self.rep_vhosts_vm)
  
   def mount_root_vm(self):
     """ Monte la partition root de la VM afin d'effectuer la post_install
     """
-    print "montage de la partition root de %s" % name_vm_dest
+    print("montage de la partition root de %s" % name_vm_dest)
     self.exec_cmd("mount /dev/%s/root-%s %s" % (vgname, name_vm_dest, self.rep_vhosts_vm))
 
   def umount_root_vm(self):
     """ Monte la partition root de la VM afin d'effectuer la post_install
     """
-    print "demontage de la partition root de %s" % name_vm_dest
+    print("demontage de la partition root de %s" % name_vm_dest)
     self.exec_cmd("umount %s" % self.rep_vhosts_vm)
 
   def set_console_xen(self):
     """ Configuration de la console xen pour la VM
     """
-    print ""
+    print("")
     self.exec_cmd("echo \"xvc0\" >> %s/etc/securetty" % self.rep_vhosts_vm) 
     if os.path.isfile("%s/etc/inittab" % self.rep_vhosts_vm):
       self.exec_cmd("echo \"7:2345:respawn:/sbin/getty 38400 xvc0\" >> %s/etc/inittab" % self.rep_vhosts_vm) 
@@ -572,7 +572,7 @@ class xen_host:
   def tri(self, dico):
     """ Permet de tirer un dictionnaire
     """
-    return sorted(dico.keys(), key=str) 
+    return sorted(list(dico.keys()), key=str) 
 
   def copy_dd_bs(self,bs=''):
     self.bs = bs

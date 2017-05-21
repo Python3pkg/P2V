@@ -2,8 +2,8 @@
 # -*- coding: utf-8 -*-
 
 
-from sshtools import Ssh
-import p2v_xen_host
+from .sshtools import Ssh
+from . import p2v_xen_host
 import os, re
 
 class GenConfNetwork(object):
@@ -40,7 +40,7 @@ class GenConfNetwork(object):
     for i in self.xen_host.tri_inverse(self.interfaces):
       chaine_local_eth = "%s" % self.interfaces[i]["LOCAL_INTERFACE"]
       chaine_new_eth = "%s" % i
-      print "remplace %s par %s" % (chaine_local_eth, chaine_new_eth)
+      print("remplace %s par %s" % (chaine_local_eth, chaine_new_eth))
       line = line.replace(chaine_local_eth,chaine_new_eth)
       device_vlan = "vlan-raw-device" 
       self.DeleteLineInFile("%s/interfaces.pre.p2v" % self.LocalDir,device_vlan)

@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from p2v_xen_host import xen_host
-from pxe_server import pxe
+from .p2v_xen_host import xen_host
+from .pxe_server import pxe
 import os,sys,shutil
 
 from optparse import OptionParser
@@ -15,7 +15,7 @@ class convert_p2v(object):
       if not hasattr(self.hote_xen, 'mac_addr'):
         mac_addr = self.hote_xen.mac_addr_v2p
         if mac_addr == "":
-          print "il manque la directive (MAC_ADDR = \"AA:BB:CC:DD:EE:FF\") dans le fichier de config pour %s . Cette directive est specifique pour demarrer que le PXE" % self.hote_xen.vmnamecfengine
+          print("il manque la directive (MAC_ADDR = \"AA:BB:CC:DD:EE:FF\") dans le fichier de config pour %s . Cette directive est specifique pour demarrer que le PXE" % self.hote_xen.vmnamecfengine)
           sys.exit()
       else:
         mac_addr = self.hote_xen.mac_addr
@@ -37,10 +37,10 @@ class convert_p2v(object):
   def P2V_PHASE_ELIGIBILITY(self):
     self.hote_xen.check_vgname()
     if self.hote_xen.get_name_vm_dest() != self.VM_NAME:
-      print "LE FQDN ne corresponds pas."
+      print("LE FQDN ne corresponds pas.")
       sys.exit() 
  
-    print "#### PHASE ELIGIBILITY ####"
+    print("#### PHASE ELIGIBILITY ####")
     self.hote_xen.get_eligibility()
     self.hote_xen.rapport_eligibility()
     sys.exit()
@@ -48,40 +48,40 @@ class convert_p2v(object):
   def P2V_PHASE_1(self):
     self.hote_xen.check_vgname()
     if self.hote_xen.get_name_vm_dest() != self.VM_NAME:
-      print "LE FQDN ne corresponds pas."
+      print("LE FQDN ne corresponds pas.")
       sys.exit()
 
-    print "#### PHASE 1/3 ####"
+    print("#### PHASE 1/3 ####")
     self.hote_xen.get_info_srv_physique()
-    print self.hote_xen.affiche_rapport()
+    print(self.hote_xen.affiche_rapport())
   
     self.hote_xen.generation_fichier_p2v()
-    print self.hote_xen.endphase()
+    print(self.hote_xen.endphase())
 
   def P2V_PHASE_2(self):
     if self.hote_xen.is_livecd() == "True":
-      print "#### PHASE 3/3 ####"
+      print("#### PHASE 3/3 ####")
       self.hote_xen.import_all_variables(self.VM_NAME)
       self.hote_xen.exec_cmd_p2v()
       self.hote_xen.post_install()
     else:
       if self.hote_xen.no_pxe == False:
-        print "#### PHASE 2/3 ####"
-        print "Installation / Configuration du Serveur PXE"
+        print("#### PHASE 2/3 ####")
+        print("Installation / Configuration du Serveur PXE")
       else:
-        print "#### PHASE 2/3 ####"
-        print "!!! ATTENTION L'OPTION 'SERVEUR PXE' A ETE DESACTIVE AFIN DE PASSER PAR UN LIVECD DANS LE CDROM !!!"
-        print "Installation / Configuration du Serveur PXE avec le DHCP uniquement"
+        print("#### PHASE 2/3 ####")
+        print("!!! ATTENTION L'OPTION 'SERVEUR PXE' A ETE DESACTIVE AFIN DE PASSER PAR UN LIVECD DANS LE CDROM !!!")
+        print("Installation / Configuration du Serveur PXE avec le DHCP uniquement")
       self.boot_pxe()
 
       if self.hote_xen.no_pxe == False:
-        print "\n\n!!! IMPORTANT AVANT DE POURSUIVRE !!! \n Le serveur PXE est démarré.\n Veuillez au paravant UnTagger le port du switch avec le vlan %s\n puis redemarrer votre serveur physique afin que celui ci boot en PXE.\n\n Une fois ces actions effectuées, relancer le p2v" % self.hote_xen.vlan
+        print("\n\n!!! IMPORTANT AVANT DE POURSUIVRE !!! \n Le serveur PXE est démarré.\n Veuillez au paravant UnTagger le port du switch avec le vlan %s\n puis redemarrer votre serveur physique afin que celui ci boot en PXE.\n\n Une fois ces actions effectuées, relancer le p2v" % self.hote_xen.vlan)
       else:
-        print "\n\n!!! IMPORTANT AVANT DE POURSUIVRE !!! \n Le serveur DHCP est démarré.\n Veuillez au paravant UnTagger le port du switch avec le vlan %s\n, puis inserer votre CD (LiveCD), redémarrer sur le CD, puis relancer le p2v" % self.hote_xen.vlan
-        print "Assurez vous que : "
-        print "   - Le port du switch soit bien UnTaggé avec le vlan %s" % self.hote_xen.vlan
-        print "   - Le paquet 'dcfldd' soit installé sur le livecd"
-        print "Votre LiveCD aura l'IP suivante : %s " % self.hote_xen.ip_physique
+        print("\n\n!!! IMPORTANT AVANT DE POURSUIVRE !!! \n Le serveur DHCP est démarré.\n Veuillez au paravant UnTagger le port du switch avec le vlan %s\n, puis inserer votre CD (LiveCD), redémarrer sur le CD, puis relancer le p2v" % self.hote_xen.vlan)
+        print("Assurez vous que : ")
+        print("   - Le port du switch soit bien UnTaggé avec le vlan %s" % self.hote_xen.vlan)
+        print("   - Le paquet 'dcfldd' soit installé sur le livecd")
+        print("Votre LiveCD aura l'IP suivante : %s " % self.hote_xen.ip_physique)
       sys.exit()
 
   def analyse_commande(self):
@@ -101,7 +101,7 @@ class convert_p2v(object):
 
     (options, args) = parser.parse_args()
     if options.vm_name == None or options.projet_name == None:
-      print "Option manquante\n"
+      print("Option manquante\n")
       os.system("convert-p2v-xen --help")
       sys.exit()
     return (options, args)
@@ -134,7 +134,7 @@ def main():
     H.boot_pxe()
     sys.exit()
 
-  print H.hote_xen.get_name_vm_dest(),H.hote_xen.type_p2v
+  print(H.hote_xen.get_name_vm_dest(),H.hote_xen.type_p2v)
 
   if options.eligibility == True:
     H.P2V_PHASE_ELIGIBILITY()
@@ -142,17 +142,17 @@ def main():
     if options.postinstall == True:
       if (H.hote_xen.is_created_lv(H.VM_NAME) == "1") and H.hote_xen.is_created_cfg(H.VM_NAME):
         H.P2V_PHASE_POSTINSTALL()
-        print "POST INSTALL"
+        print("POST INSTALL")
         sys.exit()
       else:
-        print "%s n'est pas une VM, ou les fichiers /etc/xen/P2V/%s sont manquants" % (H.VM_NAME,H.VM_NAME)
+        print("%s n'est pas une VM, ou les fichiers /etc/xen/P2V/%s sont manquants" % (H.VM_NAME,H.VM_NAME))
         sys.exit()
     else:
       if H.hote_xen.is_created_cfg(H.VM_NAME):
         if H.hote_xen.is_finish_p2v(H.VM_NAME) == "false":
           H.P2V_PHASE_2()
         else:
-          print "Le P2V a déjà été effectué"
+          print("Le P2V a déjà été effectué")
           sys.exit()
       else:
         H.P2V_PHASE_1()

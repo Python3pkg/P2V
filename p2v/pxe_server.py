@@ -4,7 +4,7 @@
 
 import os,sys, re, time
 #from p2v_xen_host import xen_host
-from sshtools import Ssh
+from .sshtools import Ssh
 from xen.xm.XenAPI import Session
 
 
@@ -14,34 +14,34 @@ class pxe :
 
 
   def install_pxe(self,vlan,vgname,ip_pxe,ip_vm,ip_xen,vm_name,mac_addr,bridge):
-    print "\n ----- Création des LVM : -----\n"
+    print("\n ----- Création des LVM : -----\n")
     os.system("lvcreate -L3G -n PXESERVER-VLAN%s %s" % (vlan,vgname))
     os.system("lvcreate -L256 -n PXESERVER-VLAN%s-swap %s" % (vlan,vgname))
 
-    print "\n ----- Création du FileSystem : -----\n"
+    print("\n ----- Création du FileSystem : -----\n")
     os.system("mkfs.ext3 -q -j /dev/%s/PXESERVER-VLAN%s" % (vgname,vlan))
     os.system("mkswap -v1 /dev/%s/PXESERVER-VLAN%s-swap" % (vgname,vlan))
 
-    print "\n ----- Création et montage de PXE : -----\n"
+    print("\n ----- Création et montage de PXE : -----\n")
     os.system("mkdir /vhosts/PXESERVER-VLAN%s" % vlan)
     os.system("mount /dev/%s/PXESERVER-VLAN%s /vhosts/PXESERVER-VLAN%s" % (vgname,vlan,vlan))
 
-    print "\n ----- Décompression de l'archive : -----\n"
+    print("\n ----- Décompression de l'archive : -----\n")
     os.system("tar jxf /etc/xen/P2V/lib/Serveur_pxe.tar.bz2 -C /vhosts/PXESERVER-VLAN%s" % vlan)
     
-    print "\n ----- Démontage du PXE : -----\n"
+    print("\n ----- Démontage du PXE : -----\n")
     os.system("umount /vhosts/PXESERVER-VLAN%s" % vlan)
     
-    print "\n ----- Check du FileSystem : -----\n"
+    print("\n ----- Check du FileSystem : -----\n")
     os.system("fsck.ext3 -f -y /dev/%s/PXESERVER-VLAN%s" % (vgname,vlan))
     
     result=""
     rep_mount = "/vhosts/PXESERVER-VLAN%s" % vlan 
     
-    print "\n ----- Montage du PXE : -----\n"
+    print("\n ----- Montage du PXE : -----\n")
     os.system("mount /dev/%s/PXESERVER-VLAN%s /vhosts/PXESERVER-VLAN%s" % (vgname,vlan,vlan))
     
-    print "\n ----- Configuration du PXE : -----\n"
+    print("\n ----- Configuration du PXE : -----\n")
     #### FICHIER NETWORK ####
     fic_network = rep_mount + "/etc/sysconfig/network"
     fic_network_tpl = rep_mount + "/etc/sysconfig/network.template"
@@ -69,17 +69,17 @@ class pxe :
     result = file(fic_pxelinux_tpl,"r").read().replace("<IP_PXE>",ip_pxe)
     file(fic_pxelinux,"w").write(result)
     
-    print "\n ----- Copie de la clef public dans LiveCD : -----\n"
+    print("\n ----- Copie de la clef public dans LiveCD : -----\n")
     #os.system("cp "+ rep_mount +"/root/.ssh/authorized_keys "+ rep_mount +"/tftpboot/images/slax/slax/rootcopy/root/.ssh/")
     #### FICHIER AUTORUN SYSRESCUECD pour deployer clef public ssh ####
     fic_autorun = rep_mount + "/tftpboot/images/sysrescue/script/autorun"
     result = file(fic_autorun,"r").read().replace("169.254.1.254",ip_pxe)
     file(fic_autorun,"w").write(result)
 
-    print "\n ----- Démontage du PXE : -----\n"
+    print("\n ----- Démontage du PXE : -----\n")
     os.system("umount /vhosts/PXESERVER-VLAN%s" % vlan)
 
-    print "\n ----- Préparation de conf xen PXE : -----\n"
+    print("\n ----- Préparation de conf xen PXE : -----\n")
     #### FICHIER CONF XEN VM PXE ####
     fic_xen_vm_pxe = "/etc/xen/vm/PXESERVER-VLAN%s" % vlan
     fic_xen_vm_pxe_tpl = "/etc/xen/P2V/lib/PXESERVER-VLAN.template"
@@ -87,21 +87,21 @@ class pxe :
     file(fic_xen_vm_pxe,"w").write(result)
 
 
-    print "\n ----- Démarrage de la VM PXE : -----\n"
+    print("\n ----- Démarrage de la VM PXE : -----\n")
     os.system("cd /etc/xen/auto ; ln -s /etc/xen/vm/PXESERVER-VLAN%s" % vlan)
     os.system("cd /etc/xen/vm ; xm create PXESERVER-VLAN%s" % vlan)
 
 
 
   def add_filter_dhcpd(self,ip_pxe,vm_name,mac_addr,ip_vm,vlan):
-    print "Ajout du filtre dhcp  -> '%s, %s, %s, %s'" % (vm_name,mac_addr,ip_vm,vlan)
+    print("Ajout du filtre dhcp  -> '%s, %s, %s, %s'" % (vm_name,mac_addr,ip_vm,vlan))
     ssh_pxe = Ssh(ip_pxe)
     ssh_pxe.exec_cmd("pxe_AddFilterDhcpd %s %s %s %s" % (vm_name,mac_addr,ip_vm,vlan))
 
 
   def waiting_cnx_pxe(self,ip_pxe,timeout=60):
     compteur = 0
-    print "Attente de connexion avec le serveur PXE ..."
+    print("Attente de connexion avec le serveur PXE ...")
 
     while 1:
       compteur += 1
@@ -109,7 +109,7 @@ class pxe :
       P = os.system("ping -c 1 -i 1 %s > /dev/null" % ip_pxe)
       if P == 0:
         time.sleep(15)
-        print "Serveur PXE est démarré"
+        print("Serveur PXE est démarré")
         break
       if compteur == timeout:
         sys.exit()
@@ -128,7 +128,7 @@ class pxe :
 
   def is_pxe(self, ip_pxe,vlan,timeout=10):
     compteur = 0
-    print "Attente de connexion avec un serveur PXE existant ..."
+    print("Attente de connexion avec un serveur PXE existant ...")
     
     bool = False
     
@@ -137,7 +137,7 @@ class pxe :
       time.sleep(1)
       P = os.system("ping -c 1 -i 1 %s > /dev/null" % ip_pxe)
       if P == 0:
-        print "Un Serveur PXE pour le vlan %s existe déjà." % vlan
+        print("Un Serveur PXE pour le vlan %s existe déjà." % vlan)
         bool = True
         break
       if compteur == timeout:

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os,re, math
-from sshtools import Ssh
+from .sshtools import Ssh
 
 
 class physical_host:
@@ -199,7 +199,7 @@ class physical_host:
     if  nb_lv[0].strip() >= 1:
       detect_lvm = "1"
     if detect_lvm == "1": 
-      print "LVM detecte, en mode HVM, le LVM sera fait dans la VM."
+      print("LVM detecte, en mode HVM, le LVM sera fait dans la VM.")
 
   def detect_lvdisplay(self):
     detect = self.exec_cmd_ssh('which lvdisplay | wc -l')
